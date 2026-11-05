@@ -385,7 +385,8 @@ function renderShifts(){
       rows+=`<div class="it"><span><b>${DAYS[i]} ${dm(d)}</b> · ${esc(t.name)}</span><span class="muted" dir="ltr">${typeHours(t)}</span></div>`; }
   }
   $("mineTitle").textContent = S.me ? `המשמרות של ${S.me} ב${L.rel==="השבוע"?"שבוע הזה":"שבוע "+L.range}` : "המשמרות שלי";
-  $("mine").innerHTML = rows ? rows+`<div class="it tot"><span>סה״כ</span><span>${fmtH(total)} שעות</span></div>` : `<div class="muted">אין משמרות רשומות${S.me?" על שמך":""} בשבוע הזה.</div>`;
+  $("mine").innerHTML = rows ? rows+`<div class="it tot"><span>סה״כ</span><span>${fmtH(total)} שעות</span></div>` : (VIEWER&&!S.me ? `<div class="row"><span class="muted" style="flex:1">בחרו את השם שלכם כדי לראות כאן את המשמרות שלכם.</span><button class="pill acc" onclick="openSettings()">מי אני?</button></div>`
+      : `<div class="muted">אין משמרות רשומות${S.me?" על שמך":""} בשבוע הזה.</div>`);
 }
 $("grid").onclick=e=>{ if(VIEWER) return; const td=e.target.closest("td[data-t]"); if(td) editCell(td.dataset.t, +td.dataset.i); };
 function editCell(tid,i){
