@@ -728,17 +728,18 @@ function showPubStatus(){
   if(st.ok) setSync(`פורסם לעובדים · ${ago(st.at)}`);
   else setSync(`הפרסום נכשל: ${esc(st.msg)} <button onclick="publishNow()">שוב</button>`, true);
 }
-// Employees: read the published schedule. raw.githubusercontent first (no rate limit), API as fallback.
-let lastRemote="", fetching=false;
+// Employees: read the published schedule.
+// The API is always fresh but allows ~60 anonymous calls an hour per network, so it is used when the page
+// opens or comes back, on "רענון", and every 10 minutes; in between, raw.githubusercontent (cached ≤5 min).
+let lastRemote="", fetching=false, lastApi=0;
 async function fetchRemote(manual){
   if(fetching) return; fetching=true;
+  const useApi = manual || Date.now()-lastApi > 10*60e3;
   const raw=`https://raw.githubusercontent.com/${SYNC.repo}/${SYNC.branch}/${SYNC.path}?t=${Date.now()}`;
   const api=`https://api.github.com/repos/${SYNC.repo}/contents/${SYNC.path}?ref=${SYNC.branch}`;
   let text=null;
-  try{ const r=await fetch(raw,{cache:"no-store"}); if(r.ok) text=await r.text(); }catch(e){}
-  if(text===null||manual){
-    try{ const r=await fetch(api,{cache:"no-store",headers:{Accept:"application/vnd.github.raw+json"}}); if(r.ok) text=await r.text(); }catch(e){}
-  }
+  if(useApi){ try{ const r=await fetch(api,{cache:"no-store",headers:{Accept:"application/vnd.github.raw+json"}}); if(r.ok){ text=await r.text(); lastApi=Date.now(); } }catch(e){} }
+  if(text===null){ try{ const r=await fetch(raw,{cache:"no-store"}); if(r.ok) text=await r.text(); }catch(e){} }
   fetching=false;
   if(text===null){
     const c=store.get("remote");
@@ -748,16 +749,17 @@ async function fetchRemote(manual){
     const d=JSON.parse(text);
     // keep the newest copy: raw can lag behind the API for a minute
     const cur=store.get("remote");
-    if(!(cur&&cur.updated&&d.updated&&cur.updated>d.updated)){
+    if(!(cur&&cur.updated&&d.updated&&cur.updated>d.updated)){ // never go back to an older (cached) copy
       if(text!==lastRemote){ lastRemote=text; const me=S.me; S=d; S.me=me; S.types=S.types||DEFAULT_TYPES; S.colors=S.colors||{}; S.weeks=S.weeks||{}; store.set("remote",d); if(!sheetOpen) renderShifts(); }
     }
     setSync(`עודכן ע״י המנהל ${ago(S.updated)} · מתרענן אוטומטית <button onclick="fetchRemote(true)">רענון</button>`);
   }catch(e){ setSync("שגיאה בקריאת הסידור", true); }
 }
 if(VIEWER){
-  fetchRemote(false);
+  fetchRemote(true);
   setInterval(()=>{ if(!document.hidden) fetchRemote(false); }, 60000);
-  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) fetchRemote(false); });
+  let hiddenAt=0;
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden) hiddenAt=Date.now(); else fetchRemote(Date.now()-hiddenAt>60e3); });
 }
 
 /* ================= native hooks ================= */
