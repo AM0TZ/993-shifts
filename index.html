@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{--bg:#f3f4f1;--card:#fff;--ink:#17201a;--muted:#66706a;--line:#dde2db;--accent:#2b7a4b;--accent-ink:#fff;--soft:#e1efe6;--head:#1f4d33;--today:#eef6f0;--warn:#b4441f;--shadow:0 1px 2px rgba(0,0,0,.05)}
+  :root[data-theme=brand]{--bg:#12215c;--card:#232f78;--ink:#ffffff;--muted:#c3c8ea;--line:#3d4a9a;--accent:#fff100;--accent-ink:#0b3b8c;--soft:#2c3a8c;--head:#fff100;--head-ink:#0b3b8c;--today:#1b2d7a;--warn:#ff5a62;--shadow:none;color-scheme:dark}
   :root[data-theme=dark]{--bg:#0c0e0d;--card:#161917;--ink:#f1f2ee;--muted:#98a29b;--line:#2a2f2c;--accent:#4fae75;--accent-ink:#06150c;--soft:#1c3427;--head:#1f4d33;--today:#14241a;--warn:#e9774f;--shadow:none;color-scheme:dark}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Heebo,system-ui,sans-serif}
@@ -35,6 +36,20 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow)}
   .sec{font-size:14px;font-weight:700;color:var(--muted);margin:16px 2px 8px}
 
+  /* ---- "ממותג": Tzomet Sfarim look (yellow band, blue, red book, green pages) ---- */
+  :root[data-theme=brand] header.top h1{color:#fff}
+  :root[data-theme=brand] header.top h1 small{color:#fff100}
+  :root[data-theme=brand] header.top{box-shadow:0 3px 0 -1px #fff100}
+  :root[data-theme=brand] .grid{border-color:#fff100}
+  :root[data-theme=brand] .grid tr.today th{box-shadow:inset -4px 0 0 #d2202a}
+  :root[data-theme=brand] .big.alt{border-color:#d2202a}
+  :root[data-theme=brand] nav{border-top:3px solid #fff100}
+  :root[data-theme=brand] .sheet{border-top:4px solid #fff100}
+  :root[data-theme=brand] .lock .ic{background:#fff100;color:#0b3b8c}
+  :root[data-theme=brand] .weeknav .lbl span{color:#72ba43}
+  .themeBtn .sw3{display:inline-flex;width:18px;height:14px;border-radius:3px;overflow:hidden}
+  .themeBtn .sw3 i{flex:1}
+
   /* ---- shifts grid ---- */
   .weeknav{display:flex;align-items:center;gap:8px;margin-top:10px}
   .weeknav .lbl{flex:1;text-align:center;font-weight:700;font-size:16px}
@@ -43,7 +58,7 @@
   .grid th,.grid td{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:6px 4px;text-align:center;vertical-align:middle}
   .grid tr>*:last-child{border-left:0}
   .grid tbody tr:last-child>*{border-bottom:0}
-  .grid thead th{background:var(--head);color:#fff;font-size:13px;font-weight:700;line-height:1.15;padding:8px 2px}
+  .grid thead th{background:var(--head);color:var(--head-ink,#fff);font-size:13px;font-weight:700;line-height:1.15;padding:8px 2px}
   .grid thead th small{display:block;font-weight:400;font-size:10.5px;opacity:.85;direction:ltr}
   .grid tbody th{font-size:13px;font-weight:700;width:64px;line-height:1.15}
   .grid tbody th small{display:block;font-weight:400;color:var(--muted);font-size:12px}
@@ -87,10 +102,8 @@
   /* ---- publishers ---- */
   input,select{width:100%;font:inherit;font-size:17px;padding:11px 14px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);outline:none}
   input:focus,select:focus{border-color:var(--accent)}
-  #q{font-size:20px;padding:13px 16px}
   .count{color:var(--muted);font-size:13px;margin-top:6px}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
-  body.typing .chips{display:none}
   .chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;font-size:13px}
   .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
   .res{display:flex;flex-direction:column;gap:8px}
@@ -104,6 +117,9 @@
   .sup{text-align:left;flex-shrink:0}
   .sup b{display:block;color:var(--accent);font-size:16px}
   .sup span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  #tab-pubs.on{position:fixed;top:0;left:0;right:0;bottom:64px;display:block}
+  #pubsFrame{width:100%;height:100%;border:0;display:block;background:var(--bg)}
 
   /* ---- bottom nav ---- */
   nav{position:fixed;bottom:0;left:0;right:0;z-index:8;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
@@ -205,16 +221,8 @@
   <div id="log"></div>
 </section>
 
-<!-- ========== PUBLISHERS ========== -->
-<section class="tab wrap" id="tab-pubs">
-  <header class="top">
-    <div class="title"><h1 id="pubTitle">איזה ספק מפיץ את ההוצאה?</h1><button class="icon themeBtn" title="בהיר / כהה"></button></div>
-    <div style="margin-top:8px"><input id="q" type="search" placeholder="הקלד שם הוצאה…" autocomplete="off"></div>
-    <div class="count" id="count">טוען…</div>
-  </header>
-  <div class="chips" id="chips"></div>
-  <div class="res" id="res"></div>
-</section>
+<!-- ========== PUBLISHERS (the Publishers app's own page, embedded) ========== -->
+<section class="tab" id="tab-pubs"><iframe id="pubsFrame" title="איתור ספק לפי הוצאה"></iframe></section>
 
 <nav id="nav">
   <button data-tab="shifts"><i><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2M8 17.5h2"/></svg></i>משמרות</button>
@@ -263,16 +271,25 @@ const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&l
 let toastT; function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2200); }
 
 /* ================= theme ================= */
-const THEME_NAMES={auto:"אוטומטי",light:"בהיר",dark:"כהה"};
+const THEME_NAMES={auto:"אוטומטי",light:"בהיר",dark:"כהה",brand:"ממותג"};
+const THEME_ORDER=["auto","light","dark","brand"];
 function themeMode(){ try{ if(A) return A.getMode(); return localStorage.getItem("c993_theme")||"auto"; }catch(e){ return "auto"; } }
 function sysDark(){ try{ if(A) return A.isSystemDark(); }catch(e){} return !!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches); }
-const isDarkNow = () => { const m=themeMode(); return m==="dark"||(m==="auto"&&sysDark()); };
+const isDarkNow = () => { const m=themeMode(); return m==="dark"||m==="brand"||(m==="auto"&&sysDark()); };
+// what is showing now: light / dark / brand
+const shownTheme = () => { const m=themeMode(); return m==="brand" ? "brand" : isDarkNow() ? "dark" : "light"; };
+const BRAND_SW='<span class="sw3" aria-hidden="true"><i style="background:#fff100"></i><i style="background:#0b3b8c"></i><i style="background:#d2202a"></i></span>';
 window.applyTheme=function(){
-  const d=isDarkNow(); document.documentElement.setAttribute("data-theme", d?"dark":"light");
-  document.querySelectorAll(".themeBtn").forEach(b=>b.textContent=d?"☀":"☾");
+  const t=shownTheme(); document.documentElement.setAttribute("data-theme", t);
+  const meta=document.querySelector('meta[name=theme-color]'); if(meta) meta.content = t==="brand"?"#12215c":"#1f4d33";
+  // the header button shows the mode it switches to next: light → dark → brand → light
+  const nxt={light:"dark",dark:"brand",brand:"light"}[t];
+  document.querySelectorAll(".themeBtn").forEach(b=>{ b.innerHTML = nxt==="brand" ? BRAND_SW : nxt==="dark" ? "☾" : "☀"; b.title="מעבר ל"+THEME_NAMES[nxt]; });
 };
-// Header toggle: switch between light and dark (from "auto" it goes to the opposite of what is showing).
-function toggleTheme(){ setTheme(isDarkNow()?"light":"dark"); toast(isDarkNow()?"מצב כהה":"מצב בהיר"); }
+function toggleTheme(){
+  const nxt={light:"dark",dark:"brand",brand:"light"}[shownTheme()];
+  setTheme(nxt); if(window.syncFrameTheme) syncFrameTheme(); toast("מצב "+THEME_NAMES[nxt]);
+}
 document.addEventListener("click",e=>{ if(e.target.closest(".themeBtn")) toggleTheme(); });
 function setTheme(m){ try{ if(A) A.setMode(m); else localStorage.setItem("c993_theme",m); }catch(e){} applyTheme(); }
 applyTheme();
@@ -582,7 +599,7 @@ function openViewerSettings(){
     <label>מי אני? (המשמרות שלך יודגשו)</label>
     <select id="setMe"><option value="">—</option>${S.staff.map(n=>`<option${n===S.me?" selected":""}>${esc(n)}</option>`).join("")}</select>
     <label>ערכת נושא</label>
-    <div class="row">${["auto","light","dark"].map(k=>`<button class="pill${k===m?" acc":""}" data-theme="${k}">${THEME_NAMES[k]}</button>`).join("")}</div>
+    <div class="row">${THEME_ORDER.map(k=>`<button class="pill${k===m?" acc":""}" data-theme="${k}">${THEME_NAMES[k]}</button>`).join("")}</div>
     <div class="hint">הסידור מתעדכן אוטומטית כשהמנהל משנה אותו. אפשר להוסיף את הדף למסך הבית: בתפריט הדפדפן ← "הוספה למסך הבית".</div>
     <div class="acts"><button class="pri" data-a="done">סיום</button></div>`, s=>{
       s.querySelector("#setMe").onchange=e=>{ S.me=e.target.value; store.set("me",S.me); renderShifts(); };
@@ -604,7 +621,7 @@ function openSettings(){
     <label>משמרות (שם · התחלה · סיום)</label>
     ${shiftTypes().map(t=>`<div class="typerow" data-id="${t.id}"><input value="${esc(t.name)}" data-k="name"><input type="time" value="${t.from}" data-k="from"><input type="time" value="${t.to}" data-k="to"></div>`).join("")}
     <label>ערכת נושא</label>
-    <div class="row">${["auto","light","dark"].map(k=>`<button class="pill${k===m?" acc":""}" data-theme="${k}">${THEME_NAMES[k]}</button>`).join("")}</div>
+    <div class="row">${THEME_ORDER.map(k=>`<button class="pill${k===m?" acc":""}" data-theme="${k}">${THEME_NAMES[k]}</button>`).join("")}</div>
     <label>פרסום לעובדים</label>
     <div class="pubbox">
       <div style="font-size:14px">הסידור מתפרסם אוטומטית אחרי כל שינוי. קישור לעובדים:<br><a href="${SYNC.site}">${SYNC.site}</a></div>
@@ -726,40 +743,33 @@ function editEntry(e){
 }
 
 /* ================= PUBLISHERS ================= */
-let PUB=null, filterSup="";
-const strip=s=>s.toLowerCase().replace(/[֑-ׇ]/g,"").replace(/["'״׳`\-–־.,()\s]/g,"");
+// The tab shows the Publishers app's own page (assets/pubs.html, synced from the Publishers repo) with all
+// its features: search, supplier filter, admin mode, edits, pictures, backup. It talks to the app through
+// the same window.Android functions as in the Publishers app.
+let pubsLoaded=false;
 function initPubs(){
-  if(PUB) return;
-  const done=data=>{
-    const rows=[]; for(const s of data.sups) for(const [name,note,li] of s.pubs) rows.push({name,note,li,sup:s.name,code:s.code});
-    rows.forEach(r=>{ r.key=strip(r.name+" "+r.note); r.k2=r.key.replace(/^ה/,""); });
-    PUB={sups:data.sups,logos:data.logos,rows};
-    $("chips").innerHTML=`<button class="chip on" data-s="">כל הספקים</button>`+data.sups.map(s=>`<button class="chip" data-s="${esc(s.name)}">${esc(s.name)}</button>`).join("");
-    renderPubs();
-  };
+  fitPubs();
+  if(pubsLoaded) return; pubsLoaded=true;
+  $("pubsFrame").src="pubs.html";
+}
+function fitPubs(){ $("tab-pubs").style.bottom=$("nav").offsetHeight+"px"; }
+window.addEventListener("resize",()=>{ if(tab==="pubs") fitPubs(); });
+const pubsWin=()=>{ try{ return $("pubsFrame").contentWindow; }catch(e){ return null; } };
+// theme changes from either page apply to both
+window.syncFrameTheme=function(){ const w=pubsWin(); try{ w&&w.applyTheme&&w.applyTheme(); }catch(e){} };
+window.onPubsBackupSaved=function(ok){ const w=pubsWin(); try{ w&&w.onBackupSaved&&w.onBackupSaved(ok); }catch(e){} };
+// Back inside the publishers page: close an open dialog, then clear the search.
+function pubsBack(){
+  const w=pubsWin(); if(!w) return false;
   try{
-    if(A) done(JSON.parse(A.asset("data.json")));
-    else fetch("data.json").then(r=>r.json()).then(done);
-  }catch(e){ $("count").textContent="לא ניתן לטעון את רשימת ההוצאות"; }
+    const d=w.document;
+    const open=[...d.querySelectorAll('dialog[open], .modal.on, .sheet.on, .ov.on, [aria-modal="true"]')].filter(x=>x.offsetParent!==null||x.open);
+    if(open.length){ const x=open[open.length-1]; if(x.close) x.close(); else { const c=x.querySelector('[data-close],.close,button[aria-label="סגירה"]'); if(c) c.click(); else x.classList.remove("on"); } return true; }
+    const q=d.getElementById("q");
+    if(q&&q.value){ q.value=""; q.dispatchEvent(new w.Event("input")); return true; }
+  }catch(e){}
+  return false;
 }
-$("chips").onclick=e=>{ const b=e.target.closest(".chip"); if(!b) return; filterSup=b.dataset.s; $("chips").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b)); renderPubs(); };
-function hl(name,term){ if(!term) return esc(name); const i=name.indexOf(term); if(i<0) return esc(name);
-  return esc(name.slice(0,i))+"<mark>"+esc(name.slice(i,i+term.length))+"</mark>"+esc(name.slice(i+term.length)); }
-function renderPubs(){
-  if(!PUB) return;
-  const raw=$("q").value.trim(), t=strip(raw), t2=t.replace(/^ה/,"");
-  document.body.classList.toggle("typing",!!raw);
-  let list=PUB.rows.filter(r=>(raw||!filterSup||r.sup===filterSup)&&(!t||r.key.includes(t)||(t2.length>1&&r.k2.includes(t2))));
-  const score=r=>r.key.startsWith(t)||r.k2.startsWith(t2)?0:1;
-  list.sort((a,b)=>(t?score(a)-score(b):0)||a.name.localeCompare(b.name,"he"));
-  $("count").textContent=raw?(list.length?`${list.length} תוצאות`:""):`${PUB.rows.length} הוצאות · ${PUB.sups.length} ספקים`;
-  $("res").innerHTML=list.length?list.map(r=>`<div class="item">
-      ${r.li!=null?`<div class="logo"><img src="${PUB.logos[r.li]}" alt="" loading="lazy"></div>`:`<div class="logo ph">${esc(r.name.replace(/^ה(?=\S)/,"").charAt(0))}</div>`}
-      <div class="pub">${hl(r.name,raw)}${r.note?`<span class="note2">${esc(r.note)}</span>`:""}</div>
-      <div class="sup"><b>${esc(r.sup)}</b><span>${r.code?"ספק "+r.code:"ללא מספר ספק"}</span></div></div>`).join("")
-    :`<div class="emptybox">לא נמצאה הוצאה בשם הזה.<br>כדאי לנסות חלק מהשם.</div>`;
-}
-$("q").addEventListener("input",()=>{ renderPubs(); window.scrollTo(0,0); });
 
 /* ================= sync: manager publishes, employees read ================= */
 const hm = d => pad(d.getHours())+":"+pad(d.getMinutes());
@@ -874,12 +884,12 @@ window.openFrom=function(t,wk){ if(sheetOpen) closeSheet(); if(wk&&/^\d{4}-\d\d-
 // Back button: close a sheet, clear the search, go back to shifts; "" lets the app exit.
 window.onBack=function(){
   if(sheetOpen){ closeSheet(); return "handled"; }
-  if(tab==="pubs" && $("q").value){ $("q").value=""; renderPubs(); return "handled"; }
+  if(tab==="pubs" && pubsBack()) return "handled";
   if(tab!=="shifts"){ openTab("shifts"); return "handled"; }
   return "";
 };
 // Re-render when the app returns to the foreground (date may have changed, data edited from elsewhere).
-window.onResumeApp=function(){ applyTheme(); const s=store.get("shifts"); if(s&&s.weeks) S=s; if(tab==="shifts") renderShifts(); if(tab==="clock") renderClock(); showPubStatus(); };
+window.onResumeApp=function(){ applyTheme(); if(window.syncFrameTheme) syncFrameTheme(); const s=store.get("shifts"); if(s&&s.weeks) S=s; if(tab==="shifts") renderShifts(); if(tab==="clock") renderClock(); showPubStatus(); };
 openTab("shifts");
 showPubStatus();
 // Make sure the employees' copy matches this phone (the app skips the upload when nothing changed).
