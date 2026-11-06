@@ -234,6 +234,15 @@
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
 
+<div id="fatal" style="display:none;position:fixed;inset:auto 12px 12px 12px;z-index:99;background:#b4441f;color:#fff;padding:12px 14px;border-radius:12px;font:14px/1.4 system-ui,sans-serif;direction:rtl"></div>
+<script>
+// If anything breaks while loading, say so on screen instead of leaving an empty page.
+window.addEventListener("error", function(e){
+  var f=document.getElementById("fatal"); if(!f) return;
+  f.style.display="block";
+  f.textContent="הדף לא נטען כראוי: "+(e.message||"שגיאה")+(e.lineno?" (שורה "+e.lineno+")":"")+" · נסו לרענן. אם זה חוזר – שלחו צילום מסך למנהל.";
+});
+</script>
 <script>
 "use strict";
 /* ================= storage & platform ================= */
@@ -243,9 +252,10 @@ const VIEWER = !A && !!window.C993_VIEWER;
 // Where the manager app publishes the schedule, and where employees read it.
 const SYNC = {repo:"AM0TZ/993-shifts", branch:"data", path:"shifts.json", site:"https://am0tz.github.io/993-shifts/"};
 if(VIEWER) document.body.classList.add("viewer");
+const MEM = {}; // used when the browser blocks site storage
 const store = {
-  get(k){ try{ const s = A ? A.load(k) : localStorage.getItem("c993_"+k); return s ? JSON.parse(s) : null; }catch(e){ return null; } },
-  set(k,v){ const s = JSON.stringify(v); try{ if(A) A.save(k,s); else localStorage.setItem("c993_"+k,s); }catch(e){} }
+  get(k){ try{ const s = A ? A.load(k) : localStorage.getItem("c993_"+k); return s ? JSON.parse(s) : null; }catch(e){ return MEM[k]!==undefined ? MEM[k] : null; } },
+  set(k,v){ MEM[k]=v; const s = JSON.stringify(v); try{ if(A) A.save(k,s); else localStorage.setItem("c993_"+k,s); }catch(e){} }
 };
 function share(text){ if(A) A.share(text); else if(navigator.share) navigator.share({text}); else { try{ navigator.clipboard.writeText(text); toast("הועתק"); }catch(e){} } }
 const $ = id => document.getElementById(id);
@@ -254,7 +264,7 @@ let toastT; function toast(m){ const t=$("toast"); t.textContent=m; t.classList.
 
 /* ================= theme ================= */
 const THEME_NAMES={auto:"אוטומטי",light:"בהיר",dark:"כהה"};
-function themeMode(){ try{ if(A) return A.getMode(); }catch(e){} return localStorage.getItem("c993_theme")||"auto"; }
+function themeMode(){ try{ if(A) return A.getMode(); return localStorage.getItem("c993_theme")||"auto"; }catch(e){ return "auto"; } }
 function sysDark(){ try{ if(A) return A.isSystemDark(); }catch(e){} return !!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches); }
 const isDarkNow = () => { const m=themeMode(); return m==="dark"||(m==="auto"&&sysDark()); };
 window.applyTheme=function(){
@@ -506,7 +516,7 @@ function weekImage(){
       const cy=y+r.h/2-(names.length-1)*LH/2;
       names.forEach((n,k)=>{
         const tw=Math.min(g.measureText(n).width+24,COL-16), cx=colX(i)+COL/2, yy=cy+k*LH;
-        g.fillStyle=colorOf(n); g.beginPath(); g.roundRect(cx-tw/2,yy-23,tw,46,9); g.fill();
+        g.fillStyle=colorOf(n); g.beginPath(); if(g.roundRect) g.roundRect(cx-tw/2,yy-23,tw,46,9); else g.rect(cx-tw/2,yy-23,tw,46); g.fill();
         g.fillStyle=textOn(colorOf(n)); g.fillText(n,cx,yy+1,COL-28);
       });
       g.fillStyle="#fff";
