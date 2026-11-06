@@ -794,7 +794,7 @@ async function fetchRemote(manual){
   }
   try{
     let d=JSON.parse(text);
-    if(d.pending){ setSync("הסידור עוד לא פורסם על ידי המנהל"); return; }
+    if(d.pending){ store.set("remote",null); S={staff:[],types:DEFAULT_TYPES,weeks:{},colors:{},me:S.me}; renderShifts(); setSync("הסידור עוד לא פורסם על ידי המנהל"); return; }
     if(d.enc){
       const pw=store.get("pw");
       const plain = pw ? await decryptSchedule(d,pw) : null;
