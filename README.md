@@ -3,4 +3,5 @@
 אתר צפייה לעובדים: **https://am0tz.github.io/993-shifts/**
 
 - הסידור מתעדכן אוטומטית: אפליקציית המנהל (ריפו `993-companion`) מעלה את `shifts.json` לענף `data` אחרי כל שינוי, והאתר בודק כל דקה.
+- כשמוגדרת סיסמה באפליקציה, `shifts.json` מוצפן (AES-256-GCM + PBKDF2) והאתר מבקש את הסיסמה.
 - הענף `main` הוא האתר עצמו (GitHub Pages). הוא נבנה מתוך `993-companion` עם `python3 tools/build_web.py ../993-shifts` – לא עורכים כאן ידנית.

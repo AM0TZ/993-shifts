@@ -148,6 +148,15 @@
   .sec.me-row{display:flex;align-items:center;gap:8px}
   .sec.me-row span.t{flex:1}
   .sec.me-row .pill{font-size:13px;padding:5px 12px;color:var(--accent);font-weight:700}
+  .lock{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px}
+  .lock.on{display:flex}
+  .lock .box{width:100%;max-width:360px;text-align:center}
+  .lock .ic{width:64px;height:64px;border-radius:18px;background:var(--head);color:#fff;display:grid;place-items:center;margin:0 auto 14px;font-size:30px}
+  .lock h2{margin:0 0 4px;font-size:22px}
+  .lock p{margin:0 0 16px;color:var(--muted);font-size:14px}
+  .lock input{text-align:center;font-size:20px}
+  .lock .err{color:var(--warn);font-size:14px;min-height:20px;margin-top:8px}
+  .lock button.go{width:100%;margin-top:10px;border:0;border-radius:14px;padding:14px;font-size:17px;font-weight:800;background:var(--accent);color:var(--accent-ink)}
   .pubbox{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:6px}
   .pubbox a{color:var(--accent);word-break:break-all}
 </style>
@@ -213,6 +222,14 @@
   <button data-tab="pubs"><i><svg viewBox="0 0 24 24"><path d="M4 5.5C6.5 4 9.5 4 12 6c2.5-2 5.5-2 8-.5V19c-2.5-1.5-5.5-1.5-8 .5-2.5-2-5.5-2-8-.5z"/><path d="M12 6v13.5"/></svg></i>הוצאות</button>
 </nav>
 
+<div class="lock" id="lock"><form class="box" id="lockForm" autocomplete="off">
+  <div class="ic">🔒</div>
+  <h2>סידור עבודה 993</h2>
+  <p>הסידור מוגן בסיסמה. את הסיסמה מקבלים מהמנהל.</p>
+  <input id="lockPw" type="password" placeholder="סיסמה" autocomplete="current-password">
+  <div class="err" id="lockErr"></div>
+  <button class="go" type="submit">כניסה</button>
+</form></div>
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
@@ -571,6 +588,10 @@ function openSettings(){
     <div class="pubbox">
       <div style="font-size:14px">הסידור מתפרסם אוטומטית אחרי כל שינוי. קישור לעובדים:<br><a href="${SYNC.site}">${SYNC.site}</a></div>
       <div class="row" style="margin-top:8px"><button class="pill" id="pubCopy">העתקת הקישור</button><button class="pill" id="pubNow">פרסום עכשיו</button></div>
+      <label style="margin-top:10px">סיסמה לאתר ${A&&A.getSitePassword&&A.getSitePassword()?"(פעילה ✓)":"(אין – האתר פתוח לכל מי שיש לו קישור)"}</label>
+      <div class="two"><div><input id="sitePw" type="text" value="${esc(A&&A.getSitePassword?A.getSitePassword():"")}" placeholder="סיסמה לעובדים" autocomplete="off"></div><div style="flex:0 0 auto"><button class="pill" id="sitePwSave" style="height:100%">שמירה</button></div></div>
+      <div class="muted" style="font-size:12px;margin-top:6px">הסידור מוצפן לפני ההעלאה, ורק מי שמזין את הסיסמה יכול לקרוא אותו. החלפת סיסמה מנתקת את כולם עד שיזינו את החדשה.</div>
+      <div class="row" style="margin-top:8px"><button class="pill" id="pubShare">שליחת קישור + סיסמה</button></div>
       <label style="margin-top:10px">טוקן GitHub ${A&&A.hasToken&&A.hasToken()?"(שמור ✓)":"(חסר)"}</label>
       <div class="two"><div><input id="pubTok" type="password" placeholder="github_pat_…" autocomplete="off"></div><div style="flex:0 0 auto"><button class="pill" id="pubTokSave" style="height:100%">שמירה</button></div></div>
       <div class="muted" style="font-size:12px;margin-top:6px">Fine-grained token לריפו ${SYNC.repo} בלבד, עם הרשאת Contents: Read and write. נשמר רק בטלפון הזה.</div>
@@ -587,6 +608,13 @@ function openSettings(){
       });
       s.querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>{ setTheme(b.dataset.theme); openSettings(); });
       s.querySelector("#pubCopy").onclick=()=>{ if(A&&A.copy) A.copy(SYNC.site); else try{ navigator.clipboard.writeText(SYNC.site); }catch(e){} toast("הקישור הועתק"); };
+      s.querySelector("#sitePwSave").onclick=()=>{
+        const pw=s.querySelector("#sitePw").value.trim();
+        if(pw && pw.length<4){ toast("סיסמה קצרה מדי (לפחות 4 תווים)"); return; }
+        A.setSitePassword(pw); toast(pw?"הסיסמה נשמרה – מפרסם מחדש":"הסיסמה הוסרה – האתר פתוח"); publishNow(); openSettings(); };
+      s.querySelector("#pubShare").onclick=()=>{
+        const pw=A&&A.getSitePassword?A.getSitePassword():"";
+        share(`סידור העבודה של סניף 993 (צומת ספרים רויאל גארדן):\n${SYNC.site}${pw?`\nסיסמה: ${pw}`:""}\n\nאחרי הכניסה: "מי אני?" ובוחרים את השם. אפשר להוסיף למסך הבית מתפריט הדפדפן.`); };
       s.querySelector("#pubNow").onclick=()=>{ publishNow(); toast("מפרסם…"); };
       s.querySelector("#pubTokSave").onclick=()=>{ const t=s.querySelector("#pubTok").value.trim(); if(!t||!A) return;
         A.setToken(t); toast("הטוקן נשמר"); publishNow(); openSettings(); };
@@ -765,7 +793,14 @@ async function fetchRemote(manual){
     setSync(c?`אין חיבור – מוצג הסידור מ-${ago(c.updated)} <button onclick="fetchRemote(true)">רענון</button>`:"לא ניתן לטעון את הסידור כרגע", true); return;
   }
   try{
-    const d=JSON.parse(text);
+    let d=JSON.parse(text);
+    if(d.pending){ setSync("הסידור עוד לא פורסם על ידי המנהל"); return; }
+    if(d.enc){
+      const pw=store.get("pw");
+      const plain = pw ? await decryptSchedule(d,pw) : null;
+      if(plain===null){ store.set("pw",""); store.set("remote",null); showLock(d, !!pw); setSync("נדרשת סיסמה"); return; }
+      text=plain; d=JSON.parse(plain);
+    }
     // keep the newest copy: raw can lag behind the API for a minute
     const cur=store.get("remote");
     if(!(cur&&cur.updated&&d.updated&&cur.updated>d.updated)){ // never go back to an older (cached) copy
@@ -774,6 +809,37 @@ async function fetchRemote(manual){
     setSync(`עודכן ע״י המנהל ${ago(S.updated)} · מתרענן אוטומטית <button onclick="fetchRemote(true)">רענון</button>`);
   }catch(e){ setSync("שגיאה בקריאת הסידור", true); }
 }
+/* ---- password-protected schedule (encrypted by the manager app) ---- */
+const b64 = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+let keyCache={};
+async function decryptSchedule(d, pw){
+  try{
+    const ck=d.salt+"|"+pw;
+    if(!keyCache[ck]){
+      const base=await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+      keyCache={[ck]: await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(d.salt),iterations:d.iter||150000,hash:"SHA-256"},
+        base, {name:"AES-GCM",length:256}, false, ["decrypt"])};
+    }
+    const out=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(d.iv)}, keyCache[ck], b64(d.data));
+    return new TextDecoder().decode(out);
+  }catch(e){ return null; }
+}
+let lockData=null;
+function showLock(d, changed){
+  lockData=d; $("lock").classList.add("on");
+  $("lockErr").textContent = changed ? "הסיסמה הוחלפה – הזינו את הסיסמה החדשה" : "";
+  setTimeout(()=>$("lockPw").focus(),50);
+}
+$("lockForm").onsubmit=async e=>{
+  e.preventDefault();
+  const pw=$("lockPw").value.trim(); if(!pw||!lockData) return;
+  $("lockErr").textContent="בודק…";
+  const plain=await decryptSchedule(lockData,pw);
+  if(plain===null){ $("lockErr").textContent="סיסמה שגויה"; $("lockPw").select(); return; }
+  store.set("pw",pw); $("lockPw").value=""; $("lock").classList.remove("on"); lockData=null;
+  lastRemote=""; fetchRemote(true);
+};
+
 if(VIEWER){
   fetchRemote(true);
   setInterval(()=>{ if(!document.hidden) fetchRemote(false); }, 60000);
