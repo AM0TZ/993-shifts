@@ -318,8 +318,19 @@ function seedClock(){
   ];
 }
 let S;
+// Fill in anything missing so an old or partial copy can never break the page.
+function normalizeS(x){
+  x = (x && typeof x==="object" && !x.enc && !x.pending) ? x : {};
+  if(!Array.isArray(x.staff)) x.staff=[];
+  if(!Array.isArray(x.types)||!x.types.length) x.types=DEFAULT_TYPES;
+  if(!x.weeks||typeof x.weeks!=="object") x.weeks={};
+  if(!x.colors||typeof x.colors!=="object") x.colors={};
+  return x;
+}
 if(VIEWER){
-  S = store.get("remote") || {staff:[],types:DEFAULT_TYPES,weeks:{},colors:{}};
+  const cached=store.get("remote");
+  if(cached && (cached.enc || !Array.isArray(cached.staff))) store.set("remote",null); // e.g. an encrypted copy saved by an older version
+  S = normalizeS(cached);
   S.me = store.get("me") || "";
 } else {
   S = store.get("shifts"); if(!S||!S.weeks){ S=seedShifts(); store.set("shifts",S); }
@@ -332,7 +343,7 @@ function textOn(hex){ const n=parseInt(hex.slice(1),16), l=.299*(n>>16&255)+.587
 // Every employee keeps a color; new names get the first color nobody uses yet.
 function ensureColors(){
   S.colors=S.colors||{}; let changed=false;
-  for(const n of S.staff) if(!S.colors[n]){
+  for(const n of (S.staff||[])) if(!S.colors[n]){
     const used=new Set(Object.values(S.colors));
     S.colors[n]=PALETTE.find(c=>!used.has(c))||PALETTE[S.staff.indexOf(n)%PALETTE.length]; changed=true;
   }
@@ -804,7 +815,7 @@ async function fetchRemote(manual){
   }
   try{
     let d=JSON.parse(text);
-    if(d.pending){ store.set("remote",null); S={staff:[],types:DEFAULT_TYPES,weeks:{},colors:{},me:S.me}; renderShifts(); setSync("הסידור עוד לא פורסם על ידי המנהל"); return; }
+    if(d.pending){ store.set("remote",null); S=Object.assign(normalizeS(null),{me:S.me}); renderShifts(); setSync("הסידור עוד לא פורסם על ידי המנהל"); return; }
     if(d.enc){
       const pw=store.get("pw");
       const plain = pw ? await decryptSchedule(d,pw) : null;
@@ -814,7 +825,7 @@ async function fetchRemote(manual){
     // keep the newest copy: raw can lag behind the API for a minute
     const cur=store.get("remote");
     if(!(cur&&cur.updated&&d.updated&&cur.updated>d.updated)){ // never go back to an older (cached) copy
-      if(text!==lastRemote){ lastRemote=text; const me=S.me; S=d; S.me=me; S.types=S.types||DEFAULT_TYPES; S.colors=S.colors||{}; S.weeks=S.weeks||{}; store.set("remote",d); if(!sheetOpen) renderShifts(); }
+      if(text!==lastRemote){ lastRemote=text; const me=S.me; S=normalizeS(d); S.me=me; store.set("remote",d); if(!sheetOpen) renderShifts(); }
     }
     setSync(`עודכן ע״י המנהל ${ago(S.updated)} · מתרענן אוטומטית <button onclick="fetchRemote(true)">רענון</button>`);
   }catch(e){ setSync("שגיאה בקריאת הסידור", true); }
