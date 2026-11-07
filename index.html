@@ -8,7 +8,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#1f4d33">
+<meta name="theme-color" content="#12215c">
+<script>/* set the bar color before the page draws (the page updates it on theme changes) */
+try{var m=localStorage.getItem("c993_theme")||"auto",d=m==="dark"||(m==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);
+document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":d?"#0c0e0d":"#f3f4f1";}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="robots" content="noindex">
 
@@ -273,6 +276,7 @@ let toastT; function toast(m){ const t=$("toast"); t.textContent=m; t.classList.
 /* ================= theme ================= */
 const THEME_NAMES={auto:"אוטומטי",light:"בהיר",dark:"כהה",brand:"ממותג"};
 const THEME_ORDER=["auto","light","dark","brand"];
+const THEME_BAR={light:"#f3f4f1",dark:"#0c0e0d",brand:"#12215c"};
 function themeMode(){ try{ if(A) return A.getMode(); return localStorage.getItem("c993_theme")||"auto"; }catch(e){ return "auto"; } }
 function sysDark(){ try{ if(A) return A.isSystemDark(); }catch(e){} return !!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches); }
 const isDarkNow = () => { const m=themeMode(); return m==="dark"||m==="brand"||(m==="auto"&&sysDark()); };
@@ -281,7 +285,8 @@ const shownTheme = () => { const m=themeMode(); return m==="brand" ? "brand" : i
 const BRAND_SW='<span class="sw3" aria-hidden="true"><i style="background:#fff100"></i><i style="background:#0b3b8c"></i><i style="background:#d2202a"></i></span>';
 window.applyTheme=function(){
   const t=shownTheme(); document.documentElement.setAttribute("data-theme", t);
-  const meta=document.querySelector('meta[name=theme-color]'); if(meta) meta.content = t==="brand"?"#12215c":"#1f4d33";
+  // browser/system bar follows the page (Chrome); Firefox and installed apps use the manifest color (brand blue)
+  const meta=document.querySelector('meta[name=theme-color]'); if(meta) meta.content = THEME_BAR[t];
   // the header button shows the mode it switches to next: light → dark → brand → light
   const nxt={light:"dark",dark:"brand",brand:"light"}[t];
   document.querySelectorAll(".themeBtn").forEach(b=>{ b.innerHTML = nxt==="brand" ? BRAND_SW : nxt==="dark" ? "☾" : "☀"; b.title="מעבר ל"+THEME_NAMES[nxt]; });
