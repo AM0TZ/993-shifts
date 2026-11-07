@@ -287,9 +287,10 @@ window.applyTheme=function(){
   const t=shownTheme(); document.documentElement.setAttribute("data-theme", t);
   // browser/system bar follows the page (Chrome); Firefox and installed apps use the manifest color (brand blue)
   const meta=document.querySelector('meta[name=theme-color]'); if(meta) meta.content = THEME_BAR[t];
-  // the header button shows the mode it switches to next: light → dark → brand → light
+  // the header button shows the current view (sun = light, moon = dark, logo book = brand);
+  // pressing it moves on: light → dark → brand → light
   const nxt={light:"dark",dark:"brand",brand:"light"}[t];
-  document.querySelectorAll(".themeBtn").forEach(b=>{ b.innerHTML = nxt==="brand" ? BRAND_SW : nxt==="dark" ? "☾" : "☀"; b.title="מעבר ל"+THEME_NAMES[nxt]; });
+  document.querySelectorAll(".themeBtn").forEach(b=>{ b.innerHTML = t==="brand" ? BRAND_SW : t==="dark" ? "☾" : "☀"; b.title="מצב "+THEME_NAMES[t]+" · הקשה למעבר ל"+THEME_NAMES[nxt]; });
 };
 function toggleTheme(){
   const nxt={light:"dark",dark:"brand",brand:"light"}[shownTheme()];
