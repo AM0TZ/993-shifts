@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מידע על ספרים · 993</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* same tokens as app.html (קומפניון 993): light / dark / brand */
+  :root{--bg:#f3f4f1;--card:#fff;--ink:#17201a;--muted:#66706a;--line:#dde2db;--accent:#2b7a4b;--accent-ink:#fff;--soft:#e1efe6;--head:#1f4d33;--today:#eef6f0;--warn:#b4441f;--shadow:0 1px 2px rgba(0,0,0,.05);
+    --ok:#2b7a4b;--okbg:#e1efe6;--mid:#9a6a00;--midbg:#fbf0d2;--bad:#b4441f;--badbg:#f8e1d8}
+  :root[data-theme=brand]{--bg:#12215c;--card:#232f78;--ink:#ffffff;--muted:#c3c8ea;--line:#3d4a9a;--accent:#fff100;--accent-ink:#0b3b8c;--soft:#2c3a8c;--head:#fff100;--head-ink:#0b3b8c;--today:#1b2d7a;--warn:#ff5a62;--shadow:none;color-scheme:dark;
+    --ok:#9fe07a;--okbg:#22406a;--mid:#fff100;--midbg:#3b3f72;--bad:#ff8a8f;--badbg:#4a2a5e}
+  :root[data-theme=dark]{--bg:#0c0e0d;--card:#161917;--ink:#f1f2ee;--muted:#98a29b;--line:#2a2f2c;--accent:#4fae75;--accent-ink:#06150c;--soft:#1c3427;--head:#1f4d33;--today:#14241a;--warn:#e9774f;--shadow:none;color-scheme:dark;
+    --ok:#6fcf97;--okbg:#16301f;--mid:#e8c15a;--midbg:#2e2714;--bad:#f08a66;--badbg:#341a12}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Heebo,system-ui,sans-serif}
+  button{font:inherit;color:inherit;cursor:pointer}
+  a{color:var(--accent)}
+  .wrap{max-width:720px;margin:0 auto;padding:0 12px 28px}
+  header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 10px}
+  .title{display:flex;align-items:center;gap:8px}
+  .title h1{flex:1;margin:0;font-size:19px;font-weight:800;line-height:1.2}
+  .title h1 small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+  .icon{border:1px solid var(--line);background:var(--card);border-radius:12px;min-width:40px;height:40px;padding:0 10px;display:grid;place-items:center;font-size:16px}
+  .icon:active{background:var(--soft)}
+  .icon[hidden]{display:none}
+  .themeBtn img.bk{width:24px;height:24px;border-radius:6px;display:block}
+  .pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:14px}
+  .pill.acc{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .muted{color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow)}
+  .sec{font-size:14px;font-weight:700;color:var(--muted);margin:18px 2px 8px;display:flex;align-items:center;gap:8px}
+  .sec span.t{flex:1}
+  input{width:100%;font:inherit;font-size:17px;padding:11px 14px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);outline:none}
+  input:focus{border-color:var(--accent)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;font-size:13px}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+  .chip.g{background:var(--soft);border-color:transparent}
+
+  /* ---- "ממותג" (same touches as the other tabs) ---- */
+  :root[data-theme=brand] header.top h1{color:#fff}
+  :root[data-theme=brand] header.top h1 small{color:#fff100}
+  :root[data-theme=brand] header.top{box-shadow:0 3px 0 -1px #fff100}
+  :root[data-theme=brand] .sheet{border-top:4px solid #fff100}
+  :root[data-theme=brand] .hero{border-color:#fff100}
+  :root[data-theme=brand] .ser tr.cur th{box-shadow:inset -4px 0 0 #d2202a}
+
+  /* ---- search ---- */
+  .mode{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px;margin-top:10px}
+  .mode button{flex:1;border:0;background:none;border-radius:9px;padding:7px 0;font-size:15px;font-weight:700;color:var(--muted)}
+  .mode button.on{background:var(--accent);color:var(--accent-ink)}
+  .sbox{display:flex;gap:8px;margin-top:8px}
+  .sbox input{flex:1}
+  .sbox .go{border:0;border-radius:14px;padding:0 18px;font-size:16px;font-weight:800;background:var(--accent);color:var(--accent-ink)}
+
+  /* ---- result lists ---- */
+  .res{display:flex;flex-direction:column;gap:8px}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:right;width:100%}
+  .item:active{background:var(--soft)}
+  .thumb{width:46px;height:64px;flex-shrink:0;border-radius:7px;background:var(--soft);display:grid;place-items:center;overflow:hidden;color:var(--accent);font-weight:800;font-size:20px}
+  .thumb.round{width:52px;height:52px;border-radius:50%}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .item .tx{flex:1;min-width:0}
+  .item .tt{font-size:17px;font-weight:700;line-height:1.25}
+  .item .st{font-size:13px;color:var(--muted);margin-top:2px}
+  .item .en{direction:ltr;text-align:right;unicode-bidi:plaintext}
+  .yr{flex-shrink:0;text-align:left;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .yr b{display:block;color:var(--accent);font-size:16px}
+
+  /* ---- book / author page ---- */
+  .hero{display:flex;gap:14px;align-items:flex-start}
+  .cover{width:112px;flex-shrink:0;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--accent);font-size:40px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+  .cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .cover.round{border-radius:50%;width:104px;aspect-ratio:1}
+  .hero .tx{flex:1;min-width:0}
+  .hero h2{margin:0;font-size:22px;line-height:1.2;font-weight:800}
+  .orig{direction:ltr;text-align:right;unicode-bidi:plaintext;color:var(--muted);font-size:15px;margin-top:3px;font-weight:500}
+  .by{margin-top:8px;font-size:16px}
+  .by button{border:0;background:none;padding:0;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+  .facts{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:15px;margin-top:10px}
+  .facts dt{color:var(--muted)}
+  .facts dd{margin:0;font-weight:500}
+  .src{font-size:11px;color:var(--muted);font-weight:400}
+
+  .aud{border-radius:16px;padding:12px 14px;border:2px solid transparent}
+  .aud.ok{background:var(--okbg);border-color:var(--ok)}
+  .aud.mid{background:var(--midbg);border-color:var(--mid)}
+  .aud.bad{background:var(--badbg);border-color:var(--bad)}
+  .aud.unk{background:var(--card);border-color:var(--line)}
+  .aud .v{display:flex;align-items:center;gap:10px}
+  .aud .badge{font-size:15px;font-weight:800;border-radius:10px;padding:5px 10px;background:var(--card);flex-shrink:0}
+  .aud.ok .badge{color:var(--ok)}.aud.mid .badge{color:var(--mid)}.aud.bad .badge{color:var(--bad)}
+  .aud .v b{font-size:17px;line-height:1.25}
+  .flags{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .flag{display:flex;gap:8px;align-items:baseline;font-size:15px}
+  .flag i{font-style:normal;font-weight:800}
+  .flag small{color:var(--muted);font-size:12px}
+  .disc{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.4}
+
+  table.ser{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .ser th,.ser td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right;vertical-align:middle;font-size:14px}
+  .ser thead th{background:var(--head);color:var(--head-ink,#fff);font-size:12.5px;font-weight:700}
+  .ser tbody tr{cursor:pointer}.ser tbody tr:active td,.ser tbody tr:active th{background:var(--soft)}
+  .ser tbody tr:last-child>*{border-bottom:0}
+  .ser tbody th{width:34px;text-align:center;font-weight:800;color:var(--accent)}
+  .ser td .en{display:block;direction:ltr;text-align:right;unicode-bidi:plaintext;color:var(--muted);font-size:12.5px}
+  .ser td.n{width:52px;text-align:center;font-variant-numeric:tabular-nums}
+  .ser tr.cur>*{background:var(--today)}
+  .ser tr.cur th{box-shadow:inset -3px 0 0 var(--accent)}
+
+  .about{font-size:15px;line-height:1.55}
+  .about p{margin:0}
+  .more{border:0;background:none;color:var(--accent);font-weight:700;padding:6px 0 0;font-size:14px}
+  .links{display:flex;flex-wrap:wrap;gap:6px}
+  .links a{text-decoration:none}
+  .stars{color:#e0a400;letter-spacing:1px}
+  .bar{height:5px;border-radius:3px;background:var(--line);margin-top:5px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+  .loading{display:flex;flex-direction:column;align-items:center;gap:10px;padding:46px 10px;color:var(--muted)}
+  .spin{width:30px;height:30px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:sp 0.8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .emptybox{text-align:center;color:var(--muted);padding:28px 10px;line-height:1.5}
+  .err{color:var(--warn)}
+
+  /* ---- sheet + toast (as in the app) ---- */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;display:none}
+  .scrim.on{display:block}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--card);border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;transform:translateY(105%);transition:transform .18s ease}
+  .sheet.on{transform:none}
+  .sheet h2{margin:0 0 4px;font-size:18px}
+  .sheet .sub{color:var(--muted);font-size:13px;margin-bottom:12px;line-height:1.45}
+  .sheet label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+  .sheet .acts{display:flex;gap:8px;margin-top:16px}
+  .sheet .acts button{flex:1;border-radius:12px;padding:12px;font-weight:700;border:1px solid var(--line);background:var(--card)}
+  .sheet .acts .pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .sheet .acts .del{color:var(--warn)}
+  .hint{background:var(--soft);border-radius:10px;padding:8px 10px;font-size:13px;margin-top:10px;line-height:1.45}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="title">
+      <h1>מידע על ספרים<small id="sub">ספר, סדרה, סופר/ת · קהל יעד ותוכן רגיש</small></h1>
+      <button class="icon" id="btnBack" title="חזרה" hidden>→</button>
+      <button class="icon themeBtn" title="בהיר / כהה"></button>
+      <button class="icon" id="btnSettings" title="הגדרות">⚙</button>
+    </div>
+    <div class="mode" id="mode">
+      <button data-m="book" class="on">ספר / סדרה</button>
+      <button data-m="author">סופר/ת</button>
+    </div>
+    <form class="sbox" id="sform" autocomplete="off">
+      <input id="q" type="search" enterkeyhint="search" placeholder="שם הספר בעברית או בשפת המקור, או ISBN">
+      <button class="go" type="submit">חיפוש</button>
+    </form>
+  </header>
+  <main id="view"></main>
+</div>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= platform (works inside the companion app, or alone in a browser) ================= */
+const A = window.Android || (function(){ try{ return parent!==window && parent.Android || null; }catch(e){ return null; } })();
+const P = (function(){ try{ return parent!==window && parent.shownTheme ? parent : null; }catch(e){ return null; } })();
+const MEM={};
+const store={
+  get(k){ try{ const s=A ? A.load("books_"+k) : localStorage.getItem("c993_books_"+k); return s ? JSON.parse(s) : (MEM[k]!==undefined?MEM[k]:null); }catch(e){ return MEM[k]!==undefined?MEM[k]:null; } },
+  set(k,v){ MEM[k]=v; const s=JSON.stringify(v); try{ if(A) A.save("books_"+k,s); else localStorage.setItem("c993_books_"+k,s); }catch(e){} }
+};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let toastT; function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2200); }
+function share(text){
+  try{ if(A&&A.share){ A.share(text); return; } }catch(e){}
+  if(navigator.share){ navigator.share({text}).catch(()=>{}); return; }
+  try{ navigator.clipboard.writeText(text); toast("הועתק"); }catch(e){ toast("לא ניתן לשתף"); }
+}
+const HEB=/[֐-׿]/;
+
+/* ================= theme: follows the app (same setting as every tab) ================= */
+const THEME_NAMES={auto:"אוטומטי",light:"בהיר",dark:"כהה",brand:"ממותג"};
+const BRAND_SW='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#fff100"/><path d="M5 7c2.2-1.2 4.6-1.2 7 .6 2.4-1.8 4.8-1.8 7-.6v10.5c-2.2-1.2-4.6-1.2-7 .6-2.4-1.8-4.8-1.8-7-.6z" fill="#d2202a"/><path d="M12 7.6v10.5" stroke="#72ba43" stroke-width="1.6"/></svg>';
+function localMode(){ try{ return localStorage.getItem("c993_theme")||"auto"; }catch(e){ return "auto"; } }
+function shown(){
+  if(P){ try{ return P.shownTheme(); }catch(e){} }
+  const m=localMode(); if(m==="brand") return "brand";
+  const dark=m==="dark"||(m==="auto"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);
+  return dark?"dark":"light";
+}
+window.applyTheme=function(){
+  const t=shown(); document.documentElement.setAttribute("data-theme",t);
+  const nxt={light:"dark",dark:"brand",brand:"light"}[t];
+  document.querySelectorAll(".themeBtn").forEach(b=>{ b.innerHTML=t==="brand"?BRAND_SW:t==="dark"?"☾":"☀"; b.title="מצב "+THEME_NAMES[t]+" · הקשה למעבר ל"+THEME_NAMES[nxt]; });
+};
+document.addEventListener("click",e=>{
+  if(!e.target.closest(".themeBtn")) return;
+  if(P&&P.toggleTheme){ try{ P.toggleTheme(); applyTheme(); return; }catch(e){} }
+  const nxt={light:"dark",dark:"brand",brand:"light"}[shown()];
+  try{ localStorage.setItem("c993_theme",nxt); }catch(e){}
+  applyTheme(); toast("מצב "+THEME_NAMES[nxt]);
+});
+if(window.matchMedia){ const mq=matchMedia("(prefers-color-scheme: dark)"); if(mq.addEventListener) mq.addEventListener("change",()=>applyTheme()); }
+applyTheme();
+
+/* ================= network ================= */
+// Free, open sources, no sign-up: Wikidata (books, series, Hebrew translations, authors), Wikipedia (summaries,
+// photos), Open Library (subjects, covers, ratings, reading counts, Hebrew editions). Google Books is optional:
+// it needs a free API key (⚙) because Google no longer answers anonymous requests.
+const UA_HDR={"Accept":"application/sparql-results+json"};
+async function getJSON(url,opt){
+  const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),20000);
+  try{ const r=await fetch(url,Object.assign({signal:ctl.signal},opt||{})); if(!r.ok) throw new Error("HTTP "+r.status); return await r.json(); }
+  finally{ clearTimeout(t); }
+}
+const QID=v=>v.replace(/^https?:\/\/www\.wikidata\.org\/entity\//,"");
+async function sparql(q){
+  const j=await getJSON("https://query.wikidata.org/sparql?format=json&query="+encodeURIComponent(q),{headers:UA_HDR});
+  return j.results.bindings.map(b=>{ const o={}; for(const k in b) o[k]=b[k].type==="uri"?QID(b[k].value):b[k].value; return o; });
+}
+async function wdSearch(text,lang){
+  const u="https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&origin=*&type=item&limit=15&language="+lang+"&uselang=he&search="+encodeURIComponent(text);
+  const j=await getJSON(u); return (j.search||[]).map(s=>s.id);
+}
+const settle=p=>p.then(v=>v,()=>null);
+const year=s=>{ if(!s) return null; const m=String(s).match(/-?\d{4}/); return m?+m[0]:null; };
+const commons=f=>f ? f.replace(/^http:/,"https:")+(f.includes("?")?"&":"?")+"width=400" : "";
+const olCover=(id,size)=>id ? "https://covers.openlibrary.org/b/id/"+id+"-"+(size||"M")+".jpg?default=false" : "";
+const norm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9֐-׿]+/g," ").replace(/\b(the|a|an)\b/g," ").replace(/\s+/g," ").trim();
+const L=(o,k)=>o[k+"He"]||o[k+"En"]||o[k+"Any"]||"";
+
+const BOOK_TYPES=new Set(["Q7725634","Q47461344","Q571","Q8261","Q49084","Q5185279","Q25379","Q1004","Q725377","Q8274","Q3331189","Q12765855","Q1279564","Q182357","Q36279","Q7725310","Q277759","Q1667921","Q14406742","Q21198342","Q17710986","Q112983","Q482","Q1371849","Q131539","Q4989906"]);
+const SERIES_TYPES=new Set(["Q277759","Q1667921","Q7725310","Q14406742","Q21198342","Q17710986"]);
+const NOT_BOOK=new Set(["Q11424","Q5398426","Q7889","Q482994","Q134556","Q7366","Q506240","Q21191270","Q24856","Q13442814","Q202866","Q24862"]);
+
+/* ================= state & navigation ================= */
+let MODE="book";
+const STACK=[];          // views to go back to: {kind, arg}
+let CUR=null;            // current view
+function setMode(m){ MODE=m; document.querySelectorAll("#mode button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+  $("q").placeholder = m==="book" ? "שם הספר בעברית או בשפת המקור, או ISBN" : "שם הסופר/ת בעברית או באנגלית"; }
+$("mode").onclick=e=>{ const b=e.target.closest("button"); if(b){ setMode(b.dataset.m); $("q").focus(); } };
+function go(kind,arg,replace){
+  if(CUR && !replace) STACK.push(CUR);
+  CUR={kind,arg}; $("btnBack").hidden=!STACK.length; window.scrollTo(0,0); run(CUR);
+}
+function back(){ if(!STACK.length) return false; CUR=STACK.pop(); $("btnBack").hidden=!STACK.length; window.scrollTo(0,0); run(CUR); return true; }
+$("btnBack").onclick=back;
+let RUN=0;
+function run(v){
+  const id=++RUN; const ok=()=>id===RUN;
+  if(v.kind==="home") return renderHome();
+  if(v.kind==="search") return doSearch(v.arg.q,v.arg.mode,ok);
+  if(v.kind==="book") return openBook(v.arg,ok);
+  if(v.kind==="olbook") return openOLBook(v.arg,ok);
+  if(v.kind==="author") return openAuthor(v.arg,ok);
+}
+// The app's back button: close the sheet, then go back a view, then let the app handle it.
+window.onBack=function(){ if(sheetOpen){ closeSheet(); return "handled"; } if(back()) return "handled"; if(CUR&&CUR.kind!=="home"){ STACK.length=0; go("home",null,true); return "handled"; } return ""; };
+$("sform").onsubmit=e=>{ e.preventDefault(); const q=$("q").value.trim(); if(!q) return; $("q").blur(); go("search",{q,mode:MODE}); };
+function loading(msg){ $("view").innerHTML=`<div class="loading"><div class="spin"></div><div>${esc(msg||"מחפש…")}</div></div>`; }
+function fail(e){ $("view").innerHTML=`<div class="emptybox err">לא הצלחתי להביא את המידע${e&&e.message?" ("+esc(e.message)+")":""}.<br>בדקו חיבור לאינטרנט ונסו שוב.</div>`; }
+
+/* ================= recent ================= */
+function remember(kind,id,label,sub,img){
+  let r=store.get("recent")||[]; r=r.filter(x=>!(x.kind===kind&&x.id===id));
+  r.unshift({kind,id,label,sub:sub||"",img:img||""}); store.set("recent",r.slice(0,15));
+}
+function renderHome(){
+  const r=store.get("recent")||[];
+  $("view").innerHTML = r.length ? `<div class="sec"><span class="t">חיפושים אחרונים</span><button class="pill" id="clr">ניקוי</button></div>
+    <div class="res">${r.map((x,i)=>`<button class="item" data-i="${i}"><div class="thumb${x.kind==="author"?" round":""}">${x.img?`<img src="${esc(x.img)}" alt="" onerror="this.remove()">`:(x.kind==="author"?"✎":"📖")}</div>
+      <div class="tx"><div class="tt">${esc(x.label)}</div><div class="st">${esc(x.sub)}</div></div><div class="yr">${x.kind==="author"?"סופר/ת":"ספר"}</div></button>`).join("")}</div>`
+    : `<div class="emptybox">הקלידו שם של ספר, סדרה או סופר/ת.<br>אפשר בעברית, בשפת המקור או מספר ISBN.<br><br><span class="muted" style="font-size:13px">המידע מגיע ממקורות פתוחים וחינמיים: ויקינתונים, ויקיפדיה ו-Open Library.</span></div>`;
+  const c=$("clr"); if(c) c.onclick=()=>{ store.set("recent",[]); renderHome(); };
+  $("view").querySelectorAll(".item").forEach(b=>b.onclick=()=>{ const x=r[+b.dataset.i]; go(x.kind==="author"?"author":(x.kind==="olbook"?"olbook":"book"),x.id); });
+}
+
+/* ================= search ================= */
+async function doSearch(q,mode,ok){
+  loading("מחפש…");
+  try{
+    if(mode==="book"){
+      const isbn=q.replace(/[\s-]/g,"");
+      if(/^(97[89])?\d{9}[\dXx]$/.test(isbn)) return await isbnSearch(isbn,ok);
+      const lang=HEB.test(q)?"he":"en";
+      let ids=await wdSearch(q,lang);
+      if(!ids.length&&lang==="en") ids=await wdSearch(q,"he");
+      const c=ids.length ? await classifyBooks(ids) : [];
+      if(!ok()) return;
+      if(!c.length){ return await olSearch(q,ok); }
+      const exact=c.filter(x=>norm(x.he)===norm(q)||norm(x.en)===norm(q));
+      if(c.length===1||(exact.length===1&&!SERIES_TYPES.has(exact[0].type))) return go("book",(exact[0]||c[0]).id,true);
+      renderBookList(c,q);
+    }else{
+      const lang=HEB.test(q)?"he":"en";
+      const ids=await wdSearch(q,lang);
+      const c=ids.length ? await classifyAuthors(ids) : [];
+      if(!ok()) return;
+      if(!c.length){ $("view").innerHTML=`<div class="emptybox">לא נמצא/ה סופר/ת בשם „${esc(q)}”.<br>נסו כתיב אחר או את השם באנגלית.</div>`; return; }
+      const exact=c.filter(x=>norm(x.he)===norm(q)||norm(x.en)===norm(q));
+      if(c.length===1||exact.length===1) return go("author",(exact[0]||c[0]).id,true);
+      renderAuthorList(c,q);
+    }
+  }catch(e){ if(ok()) fail(e); }
+}
+// keep only written works; a translation/edition points to its work
+async function classifyBooks(ids){
+  const rows=await sparql(`SELECT ?it ?type ?work ?heL ?enL ?anyL ?pub ?authHe ?authEn WHERE {
+    VALUES ?it {${ids.map(i=>"wd:"+i).join(" ")}}
+    OPTIONAL{?it wdt:P629 ?w0} BIND(COALESCE(?w0,?it) AS ?work)
+    OPTIONAL{?it wdt:P31 ?type}
+    OPTIONAL{?work rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?work rdfs:label ?enL FILTER(lang(?enL)="en")}
+    OPTIONAL{?work wdt:P577 ?pub}
+    OPTIONAL{?work wdt:P50 ?a. OPTIONAL{?a rdfs:label ?authHe FILTER(lang(?authHe)="he")} OPTIONAL{?a rdfs:label ?authEn FILTER(lang(?authEn)="en")}}
+  }`);
+  const by={};
+  for(const r of rows){
+    const o=by[r.it]||(by[r.it]={it:r.it,id:r.work,types:new Set(),he:r.heL,en:r.enL,pub:r.pub,auth:new Set()});
+    if(r.type) o.types.add(r.type); const a=r.authHe||r.authEn; if(a) o.auth.add(a);
+    if(!o.pub||(r.pub&&r.pub<o.pub)) o.pub=r.pub||o.pub;
+  }
+  const seen=new Set(), out=[];
+  for(const id of ids){ const o=by[id]; if(!o) continue;
+    const isBook=o.auth.size||[...o.types].some(t=>BOOK_TYPES.has(t))||o.id!==o.it;
+    if(!isBook||[...o.types].some(t=>NOT_BOOK.has(t))&&!o.auth.size) continue;
+    if(seen.has(o.id)) continue; seen.add(o.id);
+    o.type=[...o.types].find(t=>SERIES_TYPES.has(t))||""; out.push(o);
+  }
+  return out;
+}
+function renderBookList(c,q){
+  $("view").innerHTML=`<div class="sec"><span class="t">${c.length} תוצאות ל„${esc(q)}”</span></div><div class="res">${c.map((x,i)=>`
+    <button class="item" data-i="${i}"><div class="thumb">${x.type?"📚":"📖"}</div><div class="tx">
+      <div class="tt">${esc(x.he||x.en)}</div>
+      ${x.he&&x.en&&x.he!==x.en?`<div class="st en">${esc(x.en)}</div>`:""}
+      <div class="st">${x.type?"סדרה · ":""}${esc([...x.auth].join(", "))}</div></div>
+      <div class="yr">${year(x.pub)?`<b>${year(x.pub)}</b>`:""}</div></button>`).join("")}</div>
+    <div class="tools"><button class="pill" id="olAlso">לא מצאתי – חיפוש ב-Open Library</button></div>`;
+  $("view").querySelectorAll(".item").forEach(b=>b.onclick=()=>go("book",c[+b.dataset.i].id));
+  $("olAlso").onclick=()=>{ loading("מחפש ב-Open Library…"); olSearch(q,()=>true); };
+}
+async function olSearch(q,ok){
+  const j=await getJSON("https://openlibrary.org/search.json?limit=12&fields=key,title,author_name,first_publish_year,cover_i,readinglog_count&q="+encodeURIComponent(q));
+  if(!ok()) return;
+  const d=j.docs||[];
+  if(!d.length){ $("view").innerHTML=`<div class="emptybox">לא נמצא ספר בשם „${esc(q)}”.<br>נסו את השם בשפת המקור, חלק מהשם, או ISBN.</div>`+gbHint(); return; }
+  $("view").innerHTML=`<div class="sec"><span class="t">תוצאות מ-Open Library</span></div><div class="res">${d.map((x,i)=>`
+    <button class="item" data-i="${i}"><div class="thumb">${x.cover_i?`<img src="${olCover(x.cover_i,"S")}" alt="" onerror="this.remove()">`:"📖"}</div><div class="tx">
+      <div class="tt en">${esc(x.title)}</div><div class="st">${esc((x.author_name||[]).slice(0,3).join(", "))}</div></div>
+      <div class="yr">${x.first_publish_year?`<b>${x.first_publish_year}</b>`:""}</div></button>`).join("")}</div>`;
+  $("view").querySelectorAll(".item").forEach(b=>b.onclick=()=>go("olbook",d[+b.dataset.i].key.replace("/works/","")));
+}
+function gbHint(){ return gbKey()?"":`<div class="hint" style="margin-top:12px">טיפ: עם מפתח Google Books (חינמי, ב-⚙) אפשר למצוא גם ספרים שיצאו רק בעברית.</div>`; }
+async function isbnSearch(isbn,ok){
+  const rows=await sparql(`SELECT ?work WHERE { {?ed wdt:P212 ?v} UNION {?ed wdt:P957 ?v} FILTER(REPLACE(?v,"-","")="${isbn}") OPTIONAL{?ed wdt:P629 ?w0} BIND(COALESCE(?w0,?ed) AS ?work) } LIMIT 1`).catch(()=>[]);
+  if(!ok()) return;
+  if(rows.length) return go("book",rows[0].work,true);
+  const ed=await settle(getJSON("https://openlibrary.org/isbn/"+isbn+".json"));
+  if(!ok()) return;
+  if(ed&&ed.works&&ed.works[0]) return go("olbook",ed.works[0].key.replace("/works/",""),true);
+  const gb=await gbSearch("isbn:"+isbn);
+  if(!ok()) return;
+  if(gb&&gb.length){ const t=gb[0].volumeInfo.title; $("q").value=t; return doSearch(t,"book",ok); }
+  $("view").innerHTML=`<div class="emptybox">לא נמצא ספר עם ISBN ${esc(isbn)}.</div>`+gbHint();
+}
+
+/* ================= book page ================= */
+async function openBook(qid,ok){
+  loading("אוסף מידע על הספר…");
+  try{
+    const [main,heEd,typesR]=await Promise.all([
+      sparql(`SELECT ?heL ?enL ?title ?pub ?auth ?authHe ?authEn ?ser ?serHe ?serEn ?ord ?genreHe ?genreEn ?audHe ?audEn ?langHe ?olid ?hewiki ?enwiki ?img ?sl ?pages WHERE {
+        VALUES ?item {wd:${qid}}
+        OPTIONAL{?item rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?item rdfs:label ?enL FILTER(lang(?enL)="en")}
+        OPTIONAL{?item wdt:P1476 ?title} OPTIONAL{?item wdt:P577 ?pub} OPTIONAL{?item wdt:P1104 ?pages}
+        OPTIONAL{?item wdt:P50 ?auth. OPTIONAL{?auth rdfs:label ?authHe FILTER(lang(?authHe)="he")} OPTIONAL{?auth rdfs:label ?authEn FILTER(lang(?authEn)="en")}}
+        OPTIONAL{?item p:P179 ?st. ?st ps:P179 ?ser. OPTIONAL{?st pq:P1545 ?ord} OPTIONAL{?ser rdfs:label ?serHe FILTER(lang(?serHe)="he")} OPTIONAL{?ser rdfs:label ?serEn FILTER(lang(?serEn)="en")}}
+        OPTIONAL{?item wdt:P136 ?g. OPTIONAL{?g rdfs:label ?genreHe FILTER(lang(?genreHe)="he")} OPTIONAL{?g rdfs:label ?genreEn FILTER(lang(?genreEn)="en")}}
+        OPTIONAL{?item wdt:P2360 ?au. OPTIONAL{?au rdfs:label ?audHe FILTER(lang(?audHe)="he")} OPTIONAL{?au rdfs:label ?audEn FILTER(lang(?audEn)="en")}}
+        OPTIONAL{?item wdt:P407 ?lg. ?lg rdfs:label ?langHe FILTER(lang(?langHe)="he")}
+        OPTIONAL{?item wdt:P648 ?olid} OPTIONAL{?item wdt:P18 ?img}
+        OPTIONAL{?hw schema:about ?item; schema:isPartOf <https://he.wikipedia.org/>; schema:name ?hewiki}
+        OPTIONAL{?ew schema:about ?item; schema:isPartOf <https://en.wikipedia.org/>; schema:name ?enwiki}
+        OPTIONAL{?item wikibase:sitelinks ?sl}
+      } LIMIT 300`),
+      settle(sparql(`SELECT ?ed ?edL ?pub ?pubrL ?trL ?isbn WHERE { ?ed wdt:P629 wd:${qid}; wdt:P407 wd:Q9288.
+        OPTIONAL{?ed rdfs:label ?edL FILTER(lang(?edL)="he")} OPTIONAL{?ed wdt:P577 ?pub}
+        OPTIONAL{?ed wdt:P123 ?pubr. ?pubr rdfs:label ?pubrL FILTER(lang(?pubrL)="he")}
+        OPTIONAL{?ed wdt:P655 ?tr. ?tr rdfs:label ?trL FILTER(lang(?trL)="he")} OPTIONAL{?ed wdt:P212 ?isbn} } LIMIT 50`)),
+      settle(sparql(`SELECT ?t WHERE { wd:${qid} wdt:P31 ?t }`))
+    ]);
+    if(!ok()) return;
+    const B=collectBook(qid,main,heEd||[],(typesR||[]).map(r=>r.t));
+    const isSeries=B.types.some(t=>SERIES_TYPES.has(t));
+    // the rest in parallel: series list, Open Library, Wikipedia, Google Books
+    const serId=isSeries?qid:(B.series[0]&&B.series[0].id);
+    const olid=B.olid||await findOL(B);
+    if(!ok()) return;
+    const [ser,ol,wiki,gb]=await Promise.all([
+      serId?settle(seriesList(serId)):null,
+      olid?settle(olWork(olid)):null,
+      settle(wikiSummary(B.hewiki,B.enwiki)),
+      gbKey()?settle(gbSearch((B.he?'intitle:"'+B.he+'"':'intitle:"'+(B.title||B.en)+'"')+(B.authorsEn[0]?" inauthor:"+B.authorsEn[0].split(" ").pop():""))):null
+    ]);
+    if(!ok()) return;
+    B.isSeries=isSeries; B.ser=ser; B.ol=ol; B.olid=olid; B.wiki=wiki; B.gb=pickGB(gb,B);
+    renderBook(B);
+    remember("book",qid,B.he||B.title||B.en,[B.authors.map(a=>a.name).join(", "),B.year].filter(Boolean).join(" · "),coverOf(B));
+  }catch(e){ if(ok()) fail(e); }
+}
+function collectBook(qid,rows,ed,types){
+  const B={qid,types,authors:[],authorsEn:[],series:[],genres:[],aud:[],langs:[],he:"",en:"",title:"",year:null,heEd:[],pages:null};
+  const addU=(arr,key,val)=>{ if(val&&!arr.some(x=>x[key]===val[key])) arr.push(val); };
+  for(const r of rows){
+    B.he=B.he||r.heL||""; B.en=B.en||r.enL||""; B.title=B.title||r.title||""; B.olid=B.olid||r.olid; B.hewiki=B.hewiki||r.hewiki; B.enwiki=B.enwiki||r.enwiki; B.img=B.img||r.img; B.sl=+r.sl||0; B.pages=B.pages||r.pages;
+    const y=year(r.pub); if(y&&(!B.year||y<B.year)) B.year=y;
+    if(r.auth) addU(B.authors,"id",{id:r.auth,name:r.authHe||r.authEn||"",en:r.authEn||""});
+    if(r.ser) addU(B.series,"id",{id:r.ser,name:r.serHe||r.serEn||"",en:r.serEn||"",ord:r.ord||""});
+    if(r.genreHe||r.genreEn) addU(B.genres,"k",{k:r.genreEn||r.genreHe,he:r.genreHe||"",en:r.genreEn||""});
+    if(r.audHe||r.audEn) addU(B.aud,"k",{k:r.audEn||r.audHe,he:r.audHe||"",en:r.audEn||""});
+    if(r.langHe&&!B.langs.includes(r.langHe)) B.langs.push(r.langHe);
+  }
+  B.authorsEn=B.authors.map(a=>a.en).filter(Boolean);
+  const eds={}; for(const r of ed){ const o=eds[r.ed]||(eds[r.ed]={title:r.edL||"",year:year(r.pub),pubs:new Set(),trs:new Set(),isbn:r.isbn||""}); if(r.pubrL) o.pubs.add(r.pubrL); if(r.trL) o.trs.add(r.trL); }
+  B.heEd=Object.values(eds).sort((a,b)=>(a.year||9999)-(b.year||9999));
+  if(!B.he&&B.heEd[0]&&B.heEd[0].title) B.he=B.heEd[0].title;
+  return B;
+}
+async function findOL(B){
+  const t=B.title||B.en; if(!t) return null;
+  const j=await settle(getJSON("https://openlibrary.org/search.json?limit=1&fields=key&title="+encodeURIComponent(t)+(B.authorsEn[0]?"&author="+encodeURIComponent(B.authorsEn[0]):"")));
+  return j&&j.docs&&j.docs[0] ? j.docs[0].key.replace("/works/","") : null;
+}
+async function olWork(olid){
+  const [w,r,e,s]=await Promise.all([
+    getJSON("https://openlibrary.org/works/"+olid+".json"),
+    settle(getJSON("https://openlibrary.org/works/"+olid+"/ratings.json")),
+    settle(getJSON("https://openlibrary.org/works/"+olid+"/editions.json?limit=500")),
+    settle(getJSON("https://openlibrary.org/search.json?limit=1&fields=readinglog_count,subject,first_publish_year,cover_i&q=key:%22/works/"+olid+"%22"))
+  ]);
+  const doc=s&&s.docs&&s.docs[0]||{};
+  const heb=((e&&e.entries)||[]).filter(x=>(x.languages||[]).some(l=>l.key==="/languages/heb")).map(x=>({title:x.title||"",year:year(x.publish_date),pubs:x.publishers||[],cover:(x.covers||[]).find(c=>c>0)}));
+  const desc=w.description?(typeof w.description==="string"?w.description:w.description.value):"";
+  return {key:olid,title:w.title,subjects:[...new Set([...(w.subjects||[]),...(doc.subject||[])])],cover:(w.covers||[]).find(c=>c>0)||doc.cover_i,
+    rating:r&&r.summary&&r.summary.average,ratings:r&&r.summary&&r.summary.count,readers:doc.readinglog_count||0,firstYear:doc.first_publish_year,heb,desc};
+}
+async function seriesList(sid){
+  const rows=await sparql(`SELECT ?item ?heL ?enL ?title ?ord ?pub (MIN(?hp) AS ?hePub) (SAMPLE(?hl) AS ?heEdL) WHERE {
+    ?item p:P179 ?st. ?st ps:P179 wd:${sid}. FILTER NOT EXISTS{?item wdt:P629 ?x}
+    OPTIONAL{?st pq:P1545 ?ord}
+    OPTIONAL{?item rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?item rdfs:label ?enL FILTER(lang(?enL)="en")}
+    OPTIONAL{?item wdt:P1476 ?title} OPTIONAL{?item wdt:P577 ?pub}
+    OPTIONAL{?ed wdt:P629 ?item; wdt:P407 wd:Q9288. OPTIONAL{?ed wdt:P577 ?hp} OPTIONAL{?ed rdfs:label ?hl FILTER(lang(?hl)="he")}}
+  } GROUP BY ?item ?heL ?enL ?title ?ord ?pub LIMIT 400`);
+  const by={};
+  for(const r of rows){ const o=by[r.item]||(by[r.item]={id:r.item,he:r.heL||r.heEdL||"",en:r.title||r.enL||"",ord:r.ord||"",year:null,heYear:year(r.hePub)});
+    const y=year(r.pub); if(y&&(!o.year||y<o.year)) o.year=y; if(!o.ord&&r.ord) o.ord=r.ord; }
+  const list=Object.values(by);
+  const ordN=o=>{ const n=parseFloat(String(o.ord).replace(",",".")); return isNaN(n)?null:n; };
+  list.sort((a,b)=>{ const x=ordN(a),y=ordN(b); if(x!=null&&y!=null) return x-y; if(x!=null) return -1; if(y!=null) return 1; return (a.year||9999)-(b.year||9999); });
+  const nm=await settle(sparql(`SELECT ?heL ?enL WHERE { OPTIONAL{wd:${sid} rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{wd:${sid} rdfs:label ?enL FILTER(lang(?enL)="en")} }`));
+  return {id:sid,name:nm&&nm[0]?(nm[0].heL||nm[0].enL||""):"",en:nm&&nm[0]?nm[0].enL||"":"",list};
+}
+async function wikiSummary(he,en){
+  const one=async(lang,t)=>{ const j=await getJSON("https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(t.replace(/ /g,"_")));
+    return j&&j.extract?{lang,title:j.title,text:j.extract,thumb:j.thumbnail&&j.thumbnail.source,url:j.content_urls&&j.content_urls.mobile&&j.content_urls.mobile.page}:null; };
+  if(he){ const r=await settle(one("he",he)); if(r) return r; }
+  if(en){ const r=await settle(one("en",en)); if(r) return r; }
+  return null;
+}
+function coverOf(B){
+  const hc=B.ol&&B.ol.heb.find(x=>x.cover);
+  if(hc) return olCover(hc.cover);
+  if(B.gb&&B.gb.img) return B.gb.img;
+  if(B.ol&&B.ol.cover) return olCover(B.ol.cover);
+  if(B.img) return commons(B.img);
+  return "";
+}
+
+/* ---- audience & sensitive content (heuristic, from subjects and genres in the sources) ---- */
+const FLAGS=[
+  {k:"sex",he:"תוכן מיני",sev:3,re:/\b(erotic\w*|erotica|sex(ual|uality)? ?(content|scenes|fiction)?|sex\b|bdsm|explicit|pornograph\w*|dark romance|romance\W+(adult|erotic|contemporary)|new adult)\b|ארוטי|מין\b|מיניות/i},
+  {k:"abuse",he:"התעללות / אונס / גילוי עריות",sev:3,re:/\b(rape|sexual (abuse|assault|violence)|child (sexual )?abuse|incest|domestic violence|abused (children|women))\b|התעללות|אונס/i},
+  {k:"violence",he:"אלימות קשה / רצח",sev:2,re:/\b(violence|murder\w*|serial (killer|murder)\w*|torture|gore|massacre\w*|psychopath\w*|war crimes?|killings?)\b|אלימות|רצח/i},
+  {k:"horror",he:"אימה",sev:2,re:/\b(horror|zombies?|occult|demonology|haunted)\b|אימה/i},
+  {k:"suicide",he:"התאבדות / פגיעה עצמית",sev:3,re:/\b(suicid\w*|self[- ]?(harm|injury|mutilation))\b|התאבדות/i},
+  {k:"drugs",he:"סמים / אלכוהול / התמכרות",sev:2,re:/\b(drug (abuse|use|addiction)|drugs|substance abuse|addiction|alcoholi\w*|narcotics?)\b|סמים|התמכרות/i},
+  {k:"ed",he:"הפרעות אכילה",sev:2,re:/\b(eating disorders?|anorexia|bulimia)\b|הפרעות אכילה/i},
+  {k:"trauma",he:"שואה / רצח עם / מלחמה",sev:1,re:/\b(holocaust|genocide|concentration camps?|world war, 1939-1945)\b|שואה/i},
+  {k:"mental",he:"מצוקה נפשית / דיכאון",sev:1,re:/\b(depression, mental|mental illness|psychiatric|grief|death)\b/i},
+];
+function audience(B){
+  const parts=[]; // [text, source]
+  for(const g of B.genres){ parts.push([g.en,"ז'אנר בוויקינתונים"]); parts.push([g.he,"ז'אנר בוויקינתונים"]); }
+  for(const a of B.aud){ parts.push([a.en,"קהל יעד בוויקינתונים"]); parts.push([a.he,"קהל יעד בוויקינתונים"]); }
+  if(B.ol) for(const s of B.ol.subjects) parts.push([s,"נושא ב-Open Library"]);
+  if(B.gb) for(const c of B.gb.cats) parts.push([c,"קטגוריה ב-Google Books"]);
+  const T=parts.filter(p=>p[0]);
+  const any=re=>T.find(p=>re.test(p[0]));
+  const kid=any(/\b(juvenile|children'?s|picture books?|board books?|kinderbuch|jeunesse|infantil|easy readers?|bedtime)\b|ספרות ילדים|ספר ילדים|ילדים/i);
+  const ya=any(/\b(young adult|teen|ya fiction|adolescen\w*|juvenile fiction.*(teen|young adult))\b|נוער|בוגרים צעירים/i);
+  const adultG=any(/\b(adult fiction|adult literature|for adults|literary fiction)\b|ספרות למבוגרים|מבוגרים/i);
+  // reading level → age: "Reading Level-Grade 4" ≈ 9-10; take the lowest grade listed
+  let grade=null; for(const p of T){ const m=String(p[0]).match(/reading level[- ]grade (\d+)/i); if(m){ const g=+m[1]; if(grade==null||g<grade) grade=g; } }
+  const flags=[];
+  for(const f of FLAGS){ const hits=T.filter(p=>f.re.test(p[0])); if(hits.length) flags.push({...f,why:[...new Set(hits.map(h=>h[0]))].slice(0,3),src:[...new Set(hits.map(h=>h[1]))]}); }
+  const mature=B.gb&&B.gb.mature;
+  const sev=flags.reduce((m,f)=>Math.max(m,f.sev),0);
+  let cls="unk",badge="?",title="אין מספיק מידע על קהל היעד",ages="";
+  if(mature||(sev>=3&&!kid)){ cls="bad"; badge="18+"; title="למבוגרים בלבד – לא לילדים ולא לנוער"; }
+  else if(kid&&!ya){ cls=sev>=2?"mid":"ok"; badge=grade!=null?(grade+5)+"+":"ילדים"; title="ספר ילדים"; ages=grade!=null?"גיל משוער "+(grade+5)+"–"+(grade+7)+" (לפי רמת קריאה כיתה "+grade+")":""; }
+  else if(ya){ cls=sev>=3?"bad":sev>=2?"mid":"ok"; badge=sev>=3?"16+":"14+"; title=sev>=3?"נוער בוגר (16+) – יש תוכן רגיש":"נוער / בוגרים צעירים"; ages=grade!=null?"רמת קריאה מכיתה "+grade:""; }
+  else if(adultG||sev>=2){ cls=sev>=2?"mid":"ok"; badge="מבוגרים"; title=sev>=2?"למבוגרים – לא מתאים לילדים":"ספרות למבוגרים"; }
+  else if(T.length){ cls="unk"; badge="?"; title="קהל היעד לא מצוין במקורות"; }
+  if(kid&&ya&&!badge.includes("+")){ badge="10+"; }
+  return {cls,badge,title,ages,flags,kid,ya,mature,n:T.length};
+}
+
+function renderBook(B){
+  const A_=audience(B), cov=coverOf(B);
+  const orig=B.title||B.en; const name=B.he||orig;
+  const heEd=B.heEd[0];
+  const olHeb=B.ol?B.ol.heb.filter(x=>x.year&&(!B.year||x.year>=B.year)).sort((a,b)=>a.year-b.year):[];
+  const heYear=heEd&&heEd.year ? {y:heEd.year,src:"ויקינתונים",pub:[...heEd.pubs].join(", "),tr:[...heEd.trs].join(", ")}
+    : olHeb[0] ? {y:olHeb[0].year,src:"Open Library",pub:olHeb[0].pubs.join(", "),tr:""}
+    : B.gb&&B.gb.heb&&B.gb.year ? {y:B.gb.year,src:"Google Books",pub:B.gb.publisher||"",tr:""} : null;
+  const pubYear=B.year||(B.ol&&B.ol.firstYear);
+  const genres=B.genres.map(g=>g.he||g.en);
+  let h=`<div class="card hero">
+    <div class="cover">${cov?`<img src="${esc(cov)}" alt="" onerror="this.parentNode.textContent='📖'">`:"📖"}</div>
+    <div class="tx"><h2>${esc(name)}</h2>
+      ${orig&&orig!==name?`<div class="orig">${esc(orig)}</div>`:""}
+      ${B.authors.length?`<div class="by">${B.authors.map((a,i)=>`<button data-a="${i}">${esc(a.name)}</button>`).join(", ")}</div>`:""}
+      <dl class="facts">
+        ${pubYear?`<dt>יצא לאור</dt><dd>${pubYear}${B.langs.length?` · ${esc(B.langs.join(", "))}`:""}</dd>`:""}
+        ${heYear?`<dt>בעברית</dt><dd>${heYear.y}${heYear.pub?` · ${esc(heYear.pub)}`:""} <span class="src">(${heYear.src})</span>${heYear.tr?`<br><span class="muted">תרגום: ${esc(heYear.tr)}</span>`:""}</dd>`:`<dt>בעברית</dt><dd class="muted">לא נמצא תרגום במקורות</dd>`}
+        ${B.series.length&&!B.isSeries?`<dt>סדרה</dt><dd>${esc(B.series[0].name)}${B.series[0].ord?` · ספר ${esc(B.series[0].ord)}`:""}</dd>`:""}
+        ${B.pages?`<dt>עמודים</dt><dd>${esc(B.pages)}</dd>`:""}
+        ${B.ol&&B.ol.rating?`<dt>דירוג</dt><dd><span class="stars">${"★".repeat(Math.round(B.ol.rating))}${"☆".repeat(5-Math.round(B.ol.rating))}</span> ${B.ol.rating.toFixed(1)} <span class="src">(${B.ol.ratings} דירוגים, Open Library)</span></dd>`:""}
+      </dl></div></div>`;
+  // audience box – first thing after the title, because this is what the seller must know
+  h+=`<div class="sec"><span class="t">קהל יעד ותוכן רגיש</span></div>
+    <div class="aud ${A_.cls}"><div class="v"><span class="badge">${esc(A_.badge)}</span><b>${esc(A_.title)}</b></div>
+    ${A_.ages?`<div class="muted" style="margin-top:6px;font-size:14px">${esc(A_.ages)}</div>`:""}
+    ${A_.flags.length?`<div class="flags">${A_.flags.map(f=>`<div class="flag"><i style="color:var(--${f.sev>=3?"bad":f.sev>=2?"mid":"muted"})">●</i><div><b>${esc(f.he)}</b><br><small>${esc(f.why.join(" · "))} — ${esc(f.src.join(", "))}</small></div></div>`).join("")}</div>`
+      :A_.n?`<div class="muted" style="margin-top:8px;font-size:14px">לא נמצאו במקורות סימנים לתוכן מיני, אלימות קשה או טריגרים אחרים.</div>`:""}
+    ${A_.mature?`<div class="muted" style="margin-top:6px;font-size:13px">Google Books מסמן את הספר כתוכן למבוגרים (MATURE).</div>`:""}
+    <div class="disc">ההערכה אוטומטית, לפי נושאים וז'אנרים שמופיעים במקורות הפתוחים. היא לא מחליפה היכרות עם הספר – בספק, מעיינים או שואלים.</div></div>`;
+  if(genres.length) h+=`<div class="sec"><span class="t">ז'אנר</span></div><div class="chips">${genres.map(g=>`<span class="chip g">${esc(g)}</span>`).join("")}</div>`;
+  if(B.ser&&B.ser.list.length){
+    h+=`<div class="sec"><span class="t">${B.isSeries?"ספרי הסדרה":"כל ספרי הסדרה"}: ${esc(B.ser.name)}</span><span>${B.ser.list.length}</span></div>
+    <table class="ser"><thead><tr><th>#</th><th>שם</th><th>יצא</th><th>בעברית</th></tr></thead><tbody>${B.ser.list.map((s,i)=>`
+      <tr data-i="${i}" class="${s.id===B.qid?"cur":""}"><th>${esc(s.ord||"·")}</th><td>${esc(s.he||s.en)}${s.he&&s.en&&s.he!==s.en?`<span class="en">${esc(s.en)}</span>`:""}</td>
+      <td class="n">${s.year||"–"}</td><td class="n">${s.heYear||"–"}</td></tr>`).join("")}</tbody></table>
+    <div class="disc">„בעברית” – שנת התרגום כפי שרשומה בוויקינתונים. מקף = לא רשום (לא בהכרח שלא תורגם).</div>`;
+  }
+  const about=B.wiki&&B.wiki.text||(B.gb&&B.gb.desc)||(B.ol&&B.ol.desc)||"";
+  if(about) h+=`<div class="sec"><span class="t">על הספר</span><span class="src">${B.wiki?"ויקיפדיה"+(B.wiki.lang==="en"?" (אנגלית)":""):B.gb&&B.gb.desc?"Google Books":"Open Library"}</span></div>${aboutBox(about)}`;
+  if(B.ol&&B.ol.readers) h+=`<div class="sec"><span class="t">פופולריות</span></div><div class="card" style="font-size:15px">${B.ol.readers.toLocaleString("he-IL")} קוראים שמרו את הספר ב-Open Library${B.sl?` · ערכים ב-${B.sl} אתרי ויקי`:""}</div>`;
+  h+=linksBox(B,name,orig);
+  h+=`<div class="tools"><button class="pill acc" id="shareB">שיתוף פרטי הספר</button></div>`;
+  $("view").innerHTML=h;
+  $("view").querySelectorAll(".by button").forEach(b=>b.onclick=()=>go("author",B.authors[+b.dataset.a].id));
+  $("view").querySelectorAll(".ser tbody tr").forEach(tr=>tr.onclick=()=>{ const s=B.ser.list[+tr.dataset.i]; if(s.id!==B.qid) go("book",s.id); });
+  wireMore();
+  $("shareB").onclick=()=>share([
+    "📖 "+name+(orig&&orig!==name?" ("+orig+")":""),
+    B.authors.length?"מאת: "+B.authors.map(a=>a.name).join(", "):"",
+    pubYear?"יצא לאור: "+pubYear:"", heYear?"בעברית: "+heYear.y+(heYear.pub?" · "+heYear.pub:""):"",
+    B.series.length?"סדרה: "+B.series[0].name+(B.series[0].ord?" · ספר "+B.series[0].ord:""):"",
+    genres.length?"ז'אנר: "+genres.join(", "):"",
+    "קהל יעד: "+A_.title+(A_.flags.length?" · "+A_.flags.map(f=>f.he).join(", "):"")
+  ].filter(Boolean).join("\n"));
+}
+function aboutBox(t){
+  const long=t.length>420;
+  return `<div class="card about"><p class="ab">${esc(long?t.slice(0,400).replace(/\s\S*$/,"")+"…":t)}</p>${long?`<button class="more" data-full="${esc(t)}">להמשך קריאה</button>`:""}</div>`;
+}
+function wireMore(){ $("view").querySelectorAll(".more").forEach(b=>b.onclick=()=>{ b.previousElementSibling.textContent=b.dataset.full; b.remove(); }); }
+function linksBox(B,name,orig){
+  const L_=[];
+  if(B.wiki&&B.wiki.url) L_.push(["ויקיפדיה",B.wiki.url]);
+  if(B.qid) L_.push(["ויקינתונים","https://www.wikidata.org/wiki/"+B.qid]);
+  if(B.olid) L_.push(["Open Library","https://openlibrary.org/works/"+B.olid]);
+  const heQ=encodeURIComponent(name), enQ=encodeURIComponent((orig||name)+(B.authorsEn&&B.authorsEn[0]?" "+B.authorsEn[0]:""));
+  L_.push(["הספרייה הלאומית","https://www.nli.org.il/he/discover?query="+heQ]);
+  L_.push(["סימניה","https://www.google.com/search?q="+encodeURIComponent("site:simania.co.il "+name)]);
+  L_.push(["Goodreads","https://www.goodreads.com/search?q="+enQ]);
+  L_.push(["Common Sense Media","https://www.commonsensemedia.org/search/"+encodeURIComponent(orig||name)]);
+  return `<div class="sec"><span class="t">מידע נוסף</span></div><div class="links">${L_.map(l=>`<a class="chip" href="${esc(l[1])}" target="_top" rel="noopener">${esc(l[0])} ↗</a>`).join("")}</div>`;
+}
+
+/* ---- book that exists only in Open Library ---- */
+async function openOLBook(olid,ok){
+  loading("אוסף מידע על הספר…");
+  try{
+    const wd=await settle(sparql(`SELECT ?it WHERE { ?it wdt:P648 "${olid}" } LIMIT 1`));
+    if(!ok()) return;
+    if(wd&&wd[0]) return go("book",wd[0].it,true);
+    const ol=await olWork(olid);
+    const w=await getJSON("https://openlibrary.org/works/"+olid+".json");
+    const authors=await Promise.all((w.authors||[]).slice(0,3).map(a=>settle(getJSON("https://openlibrary.org"+a.author.key+".json"))));
+    if(!ok()) return;
+    const B={qid:null,olid,types:[],authors:[],authorsEn:authors.filter(Boolean).map(a=>a.name),series:[],genres:[],aud:[],langs:[],he:"",en:ol.title,title:ol.title,year:ol.firstYear,heEd:[],ol,wiki:null,gb:null};
+    renderBook(B);
+    $("view").querySelector(".hero .tx h2").insertAdjacentHTML("afterend",B.authorsEn.length?`<div class="by">${esc(B.authorsEn.join(", "))}</div>`:"");
+    remember("olbook",olid,ol.title,B.authorsEn.join(", "),coverOf(B));
+  }catch(e){ if(ok()) fail(e); }
+}
+
+/* ================= authors ================= */
+async function classifyAuthors(ids){
+  const rows=await sparql(`SELECT ?it ?heL ?enL ?desc ?b ?d ?img (COUNT(DISTINCT ?w) AS ?nw) WHERE {
+    VALUES ?it {${ids.map(i=>"wd:"+i).join(" ")}} ?it wdt:P31 wd:Q5.
+    OPTIONAL{?it rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?it rdfs:label ?enL FILTER(lang(?enL)="en")}
+    OPTIONAL{?it schema:description ?desc FILTER(lang(?desc)="he")}
+    OPTIONAL{?it wdt:P569 ?b} OPTIONAL{?it wdt:P570 ?d} OPTIONAL{?it wdt:P18 ?img}
+    OPTIONAL{?w wdt:P50 ?it}
+  } GROUP BY ?it ?heL ?enL ?desc ?b ?d ?img`);
+  const by={}; for(const r of rows) if(!by[r.it]) by[r.it]={id:r.it,he:r.heL||"",en:r.enL||"",desc:r.desc||"",b:year(r.b),d:year(r.d),img:r.img||"",nw:+r.nw||0};
+  return ids.map(i=>by[i]).filter(Boolean).filter(x=>x.nw>0||/סופר|משורר|מחבר|כותב|writer|author|novelist|poet/i.test(x.desc));
+}
+function renderAuthorList(c,q){
+  $("view").innerHTML=`<div class="sec"><span class="t">${c.length} תוצאות ל„${esc(q)}”</span></div><div class="res">${c.map((x,i)=>`
+    <button class="item" data-i="${i}"><div class="thumb round">${x.img?`<img src="${esc(commons(x.img))}" alt="" onerror="this.remove()">`:"✎"}</div><div class="tx">
+      <div class="tt">${esc(x.he||x.en)}</div><div class="st">${esc(x.desc)}</div></div>
+      <div class="yr">${x.b?`<b>${x.b}${x.d?"–"+x.d:""}</b>`:""}${x.nw?x.nw+" יצירות":""}</div></button>`).join("")}</div>`;
+  $("view").querySelectorAll(".item").forEach(b=>b.onclick=()=>go("author",c[+b.dataset.i].id));
+}
+let AUTH=null, ASORT="pop";
+async function openAuthor(qid,ok){
+  loading("אוסף מידע על הסופר/ת…");
+  try{
+    const [info,works]=await Promise.all([
+      sparql(`SELECT ?heL ?enL ?desc ?b ?d ?img ?natHe ?occHe ?bpHe ?hewiki ?enwiki ?olid WHERE { VALUES ?it {wd:${qid}}
+        OPTIONAL{?it rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?it rdfs:label ?enL FILTER(lang(?enL)="en")}
+        OPTIONAL{?it schema:description ?desc FILTER(lang(?desc)="he")}
+        OPTIONAL{?it wdt:P569 ?b} OPTIONAL{?it wdt:P570 ?d} OPTIONAL{?it wdt:P18 ?img}
+        OPTIONAL{?it wdt:P27 ?n. ?n rdfs:label ?natHe FILTER(lang(?natHe)="he")}
+        OPTIONAL{?it wdt:P106 ?o. ?o rdfs:label ?occHe FILTER(lang(?occHe)="he")}
+        OPTIONAL{?it wdt:P19 ?bp. ?bp rdfs:label ?bpHe FILTER(lang(?bpHe)="he")}
+        OPTIONAL{?hw schema:about ?it; schema:isPartOf <https://he.wikipedia.org/>; schema:name ?hewiki}
+        OPTIONAL{?ew schema:about ?it; schema:isPartOf <https://en.wikipedia.org/>; schema:name ?enwiki}
+        OPTIONAL{?it wdt:P648 ?olid} } LIMIT 200`),
+      sparql(`SELECT ?w ?heL ?enL ?title ?pub ?sl (SAMPLE(?t) AS ?type) (SAMPLE(?serHe) AS ?ser) (MIN(?hp) AS ?hePub) WHERE {
+        ?w wdt:P50 wd:${qid}. FILTER NOT EXISTS{?w wdt:P629 ?x} FILTER NOT EXISTS{?w wdt:P31 wd:Q13442814}
+        OPTIONAL{?w wdt:P31 ?t}
+        OPTIONAL{?w rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?w rdfs:label ?enL FILTER(lang(?enL)="en")}
+        OPTIONAL{?w wdt:P1476 ?title} OPTIONAL{?w wdt:P577 ?pub} OPTIONAL{?w wikibase:sitelinks ?sl}
+        OPTIONAL{?w wdt:P179 ?s. ?s rdfs:label ?serHe FILTER(lang(?serHe)="he")}
+        OPTIONAL{?ed wdt:P629 ?w; wdt:P407 wd:Q9288. OPTIONAL{?ed wdt:P577 ?hp}}
+      } GROUP BY ?w ?heL ?enL ?title ?pub ?sl LIMIT 600`)
+    ]);
+    if(!ok()) return;
+    const I={id:qid,nat:[],occ:[]};
+    for(const r of info){ I.he=I.he||r.heL; I.en=I.en||r.enL; I.desc=I.desc||r.desc; I.b=I.b||r.b; I.d=I.d||r.d; I.img=I.img||r.img; I.bp=I.bp||r.bpHe;
+      I.hewiki=I.hewiki||r.hewiki; I.enwiki=I.enwiki||r.enwiki; I.olid=I.olid||r.olid;
+      if(r.natHe&&!I.nat.includes(r.natHe)) I.nat.push(r.natHe); if(r.occHe&&!I.occ.includes(r.occHe)) I.occ.push(r.occHe); }
+    const W={}; for(const r of works){ const o=W[r.w]||(W[r.w]={id:r.w,he:r.heL||"",en:r.title||r.enL||"",year:null,sl:+r.sl||0,type:r.type||"",ser:r.ser||"",heYear:year(r.hePub),readers:0});
+      const y=year(r.pub); if(y&&(!o.year||y<o.year)) o.year=y; }
+    const [wiki,ol]=await Promise.all([ settle(wikiSummary(I.hewiki,I.enwiki)),
+      settle(getJSON("https://openlibrary.org/search.json?limit=200&sort=readinglog&fields=key,title,first_publish_year,readinglog_count,ratings_average,ratings_count,cover_i&"+(I.olid?"author_key="+I.olid:"author="+encodeURIComponent(I.en||I.he||"")))) ]);
+    if(!ok()) return;
+    // merge Open Library reading counts into the Wikidata list; popular OL-only titles are added too
+    const byTitle={}; for(const w of Object.values(W)) byTitle[norm(w.en)]=w;
+    const extra=[];
+    for(const d of (ol&&ol.docs)||[]){ const w=byTitle[norm(d.title)];
+      if(w){ w.readers=Math.max(w.readers,d.readinglog_count||0); w.rating=w.rating||d.ratings_average; if(!w.year) w.year=d.first_publish_year; if(!w.cover&&d.cover_i) w.cover=d.cover_i; }
+      else if((d.readinglog_count||0)>=5&&extra.length<60){ const k=norm(d.title); if(!byTitle[k]){ const o={id:null,olid:d.key.replace("/works/",""),he:"",en:d.title,year:d.first_publish_year,sl:0,readers:d.readinglog_count||0,rating:d.ratings_average,cover:d.cover_i}; byTitle[k]=o; extra.push(o); } } }
+    let list=Object.values(W).concat(extra);
+    for(const w of list) w.pop=(w.readers||0)+w.sl*150;
+    AUTH={I,wiki,list:list.filter(w=>!SERIES_TYPES.has(w.type)),series:list.filter(w=>SERIES_TYPES.has(w.type))};
+    renderAuthor();
+    remember("author",qid,I.he||I.en,[I.b&&year(I.b),I.d&&year(I.d)].filter(Boolean).join("–")||I.desc||"",I.img?commons(I.img):(wiki&&wiki.thumb)||"");
+  }catch(e){ if(ok()) fail(e); }
+}
+function renderAuthor(){
+  const {I,wiki,list,series}=AUTH;
+  const img=I.img?commons(I.img):(wiki&&wiki.thumb)||"";
+  const by=year(I.b), dy=year(I.d);
+  const sorted=list.slice().sort(ASORT==="pop"?(a,b)=>b.pop-a.pop||(a.year||9999)-(b.year||9999)
+    :ASORT==="year"?(a,b)=>(a.year||9999)-(b.year||9999):(a,b)=>(a.he||a.en).localeCompare(b.he||b.en,"he"));
+  const max=Math.max(1,...list.map(w=>w.pop));
+  let h=`<div class="card hero"><div class="cover round">${img?`<img src="${esc(img)}" alt="" onerror="this.parentNode.textContent='✎'">`:"✎"}</div>
+    <div class="tx"><h2>${esc(I.he||I.en)}</h2>${I.en&&I.en!==I.he?`<div class="orig">${esc(I.en)}</div>`:""}
+    <dl class="facts">
+      ${by?`<dt>${dy?"חי/ה":"נולד/ה"}</dt><dd>${by}${dy?"–"+dy:""}${I.bp?` · ${esc(I.bp)}`:""}</dd>`:""}
+      ${I.nat.length?`<dt>אזרחות</dt><dd>${esc(I.nat.join(", "))}</dd>`:""}
+      ${I.occ.length?`<dt>עיסוק</dt><dd>${esc(I.occ.slice(0,4).join(", "))}</dd>`:""}
+      <dt>יצירות</dt><dd>${list.length}${series.length?` · ${series.length} סדרות`:""}</dd>
+    </dl></div></div>`;
+  const about=wiki&&wiki.text||I.desc||"";
+  if(about) h+=`<div class="sec"><span class="t">אודות</span><span class="src">${wiki?"ויקיפדיה"+(wiki.lang==="en"?" (אנגלית)":""):"ויקינתונים"}</span></div>${aboutBox(about)}`;
+  if(series.length) h+=`<div class="sec"><span class="t">סדרות</span></div><div class="res">${series.sort((a,b)=>b.pop-a.pop).map(s=>`<button class="item" data-id="${s.id}"><div class="thumb">📚</div><div class="tx"><div class="tt">${esc(s.he||s.en)}</div>${s.he&&s.en&&s.he!==s.en?`<div class="st en">${esc(s.en)}</div>`:""}</div><div class="yr">${s.year?`<b>${s.year}</b>`:""}</div></button>`).join("")}</div>`;
+  h+=`<div class="sec"><span class="t">ספרים</span></div>
+    <div class="mode" id="asort" style="margin:0 0 10px"><button data-s="pop" class="${ASORT==="pop"?"on":""}">לפי פופולריות</button><button data-s="name" class="${ASORT==="name"?"on":""}">לפי שם</button><button data-s="year" class="${ASORT==="year"?"on":""}">לפי שנה</button></div>
+    <div class="res">${sorted.slice(0,150).map((w,i)=>`<button class="item" data-k="${i}">
+      <div class="thumb">${w.cover?`<img src="${olCover(w.cover,"S")}" alt="" onerror="this.remove()">`:"📖"}</div>
+      <div class="tx"><div class="tt">${esc(w.he||w.en)}</div>${w.he&&w.en&&w.he!==w.en?`<div class="st en">${esc(w.en)}</div>`:""}
+        <div class="st">${w.ser?esc(w.ser)+" · ":""}${w.heYear?"בעברית "+w.heYear:""}</div>
+        ${ASORT==="pop"?`<div class="bar"><i style="width:${Math.max(3,Math.round(100*w.pop/max))}%"></i></div>`:""}</div>
+      <div class="yr">${w.year?`<b>${w.year}</b>`:""}</div></button>`).join("")}</div>
+    ${sorted.length>150?`<div class="disc">מוצגים 150 מתוך ${sorted.length}.</div>`:""}
+    <div class="disc">פופולריות = כמה קוראים שמרו את הספר ב-Open Library, ובכמה אתרי ויקי בשפות שונות יש עליו ערך.</div>`;
+  h+=`<div class="sec"><span class="t">מידע נוסף</span></div><div class="links">
+    ${wiki&&wiki.url?`<a class="chip" target="_top" href="${esc(wiki.url)}">ויקיפדיה ↗</a>`:""}
+    <a class="chip" target="_top" href="https://www.wikidata.org/wiki/${I.id}">ויקינתונים ↗</a>
+    ${I.olid?`<a class="chip" target="_top" href="https://openlibrary.org/authors/${esc(I.olid)}">Open Library ↗</a>`:""}
+    <a class="chip" target="_top" href="https://www.nli.org.il/he/discover?query=${encodeURIComponent(I.he||I.en)}">הספרייה הלאומית ↗</a></div>`;
+  $("view").innerHTML=h; wireMore();
+  $("asort").onclick=e=>{ const b=e.target.closest("button"); if(b){ ASORT=b.dataset.s; renderAuthor(); } };
+  $("view").querySelectorAll(".item[data-id]").forEach(b=>b.onclick=()=>go("book",b.dataset.id));
+  $("view").querySelectorAll(".item[data-k]").forEach(b=>b.onclick=()=>{ const w=sorted[+b.dataset.k]; if(w.id) go("book",w.id); else go("olbook",w.olid); });
+}
+
+/* ================= Google Books (optional, free key) ================= */
+const gbKey=()=>store.get("gbkey")||"";
+async function gbSearch(q){
+  const k=gbKey(); if(!k) return null;
+  const j=await getJSON("https://www.googleapis.com/books/v1/volumes?maxResults=10&q="+encodeURIComponent(q)+"&key="+encodeURIComponent(k));
+  return j.items||[];
+}
+function pickGB(items,B){
+  if(!items||!items.length) return null;
+  const vi=items.map(i=>i.volumeInfo);
+  const he=vi.filter(v=>v.language==="iw"||v.language==="he");
+  const v=he[0]||vi[0];
+  const cats=[...new Set(vi.flatMap(x=>x.categories||[]))];
+  const yrs=he.map(x=>year(x.publishedDate)).filter(Boolean).sort();
+  return {cats,mature:vi.some(x=>x.maturityRating==="MATURE"),img:v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail||"").replace(/^http:/,"https:"),
+    desc:(he.find(x=>x.description)||{}).description||"",heb:!!he.length,year:yrs[0],publisher:he[0]&&he[0].publisher};
+}
+
+/* ================= settings sheet ================= */
+let sheetOpen=false;
+function openSheet(html,wire){ $("sheet").innerHTML=html; $("sheet").classList.add("on"); $("scrim").classList.add("on"); sheetOpen=true; if(wire) wire($("sheet")); }
+function closeSheet(){ $("sheet").classList.remove("on"); $("scrim").classList.remove("on"); sheetOpen=false; }
+$("scrim").onclick=closeSheet;
+$("btnSettings").onclick=()=>openSheet(`<h2>הגדרות · מידע על ספרים</h2>
+  <div class="sub">המידע מגיע ממקורות פתוחים וחינמיים, בלי הרשמה: ויקינתונים, ויקיפדיה ו-Open Library.</div>
+  <label>מפתח Google Books (לא חובה)</label>
+  <input id="gk" dir="ltr" placeholder="AIza…" value="${esc(gbKey())}">
+  <div class="hint">מוסיף כריכות של מהדורות עבריות, ספרים שיצאו רק בעברית, קטגוריות וסימון „למבוגרים” של Google. המפתח חינמי: console.cloud.google.com ← API ו-Services ← מפעילים את Books API ← Credentials ← Create API key. הוא נשמר רק בטלפון.</div>
+  <div class="acts"><button class="pri" id="sv">שמירה</button><button class="del" id="clr">ניקוי היסטוריה</button><button id="cl">סגירה</button></div>`,
+  s=>{ s.querySelector("#sv").onclick=()=>{ store.set("gbkey",s.querySelector("#gk").value.trim()); closeSheet(); toast("נשמר"); };
+       s.querySelector("#clr").onclick=()=>{ store.set("recent",[]); closeSheet(); if(CUR&&CUR.kind==="home") renderHome(); toast("ההיסטוריה נוקתה"); };
+       s.querySelector("#cl").onclick=closeSheet; });
+
+window.onResumeApp=()=>applyTheme();
+go("home",null,true);
+</script>
+</body>
+</html>
