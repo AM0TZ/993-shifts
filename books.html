@@ -380,10 +380,11 @@ async function openBook(qid,ok){
   loading("אוסף מידע על הספר…");
   try{
     const [main,heEd,typesR]=await Promise.all([
-      sparql(`SELECT ?heL ?enL ?title ?pub ?auth ?authHe ?authEn ?ser ?serHe ?serEn ?ord ?genreHe ?genreEn ?audHe ?audEn ?langHe ?olid ?hewiki ?enwiki ?img ?sl ?pages WHERE {
+      sparql(`SELECT ?heL ?enL ?title ?tl ?code ?pub ?auth ?authHe ?authEn ?ser ?serHe ?serEn ?ord ?genreHe ?genreEn ?audHe ?audEn ?langHe ?olid ?hewiki ?enwiki ?img ?sl ?pages WHERE {
         VALUES ?item {wd:${qid}}
         OPTIONAL{?item rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?item rdfs:label ?enL FILTER(lang(?enL)="en")}
-        OPTIONAL{?item wdt:P1476 ?title} OPTIONAL{?item wdt:P577 ?pub} OPTIONAL{?item wdt:P1104 ?pages}
+        OPTIONAL{?item wdt:P1476 ?title BIND(lang(?title) AS ?tl)} OPTIONAL{?item wdt:P577 ?pub} OPTIONAL{?item wdt:P1104 ?pages}
+        OPTIONAL{?item wdt:P407/wdt:P218 ?code}
         OPTIONAL{?item wdt:P50 ?auth. OPTIONAL{?auth rdfs:label ?authHe FILTER(lang(?authHe)="he")} OPTIONAL{?auth rdfs:label ?authEn FILTER(lang(?authEn)="en")}}
         OPTIONAL{?item p:P179 ?st. ?st ps:P179 ?ser. OPTIONAL{?st pq:P1545 ?ord} OPTIONAL{?ser rdfs:label ?serHe FILTER(lang(?serHe)="he")} OPTIONAL{?ser rdfs:label ?serEn FILTER(lang(?serEn)="en")}}
         OPTIONAL{?item wdt:P136 ?g. OPTIONAL{?g rdfs:label ?genreHe FILTER(lang(?genreHe)="he")} OPTIONAL{?g rdfs:label ?genreEn FILTER(lang(?genreEn)="en")}}
@@ -420,10 +421,11 @@ async function openBook(qid,ok){
   }catch(e){ if(ok()) fail(e); }
 }
 function collectBook(qid,rows,ed,types){
-  const B={qid,types,authors:[],authorsEn:[],series:[],genres:[],aud:[],langs:[],he:"",en:"",title:"",year:null,heEd:[],pages:null};
+  const B={qid,types,authors:[],authorsEn:[],series:[],genres:[],aud:[],langs:[],he:"",en:"",title:"",year:null,heEd:[],pages:null,codes:[]};
+  const titles=[];
   const addU=(arr,key,val)=>{ if(val&&!arr.some(x=>x[key]===val[key])) arr.push(val); };
   for(const r of rows){
-    B.he=B.he||r.heL||""; B.en=B.en||r.enL||""; B.title=B.title||r.title||""; B.olid=B.olid||r.olid; B.hewiki=B.hewiki||r.hewiki; B.enwiki=B.enwiki||r.enwiki; B.img=B.img||r.img; B.sl=+r.sl||0; B.pages=B.pages||r.pages;
+    B.he=B.he||r.heL||""; B.en=B.en||r.enL||""; if(r.title&&!titles.some(t=>t.t===r.title)) titles.push({t:r.title,l:r.tl||""}); if(r.code&&!B.codes.includes(r.code)) B.codes.push(r.code); B.olid=B.olid||r.olid; B.hewiki=B.hewiki||r.hewiki; B.enwiki=B.enwiki||r.enwiki; B.img=B.img||r.img; B.sl=+r.sl||0; B.pages=B.pages||r.pages;
     const y=year(r.pub); if(y&&(!B.year||y<B.year)) B.year=y;
     if(r.auth) addU(B.authors,"id",{id:r.auth,name:r.authHe||r.authEn||"",en:r.authEn||""});
     if(r.ser) addU(B.series,"id",{id:r.ser,name:r.serHe||r.serEn||"",en:r.serEn||"",ord:r.ord||""});
@@ -432,6 +434,9 @@ function collectBook(qid,rows,ed,types){
     if(r.langHe&&!B.langs.includes(r.langHe)) B.langs.push(r.langHe);
   }
   B.authorsEn=B.authors.map(a=>a.en).filter(Boolean);
+  // original title: the title in the work's own language (Wikidata may list titles in several languages)
+  B.title=(titles.find(t=>B.codes.includes(t.l))||titles.find(t=>t.l===(B.codes[0]||"en"))||titles[0]||{t:""}).t;
+  B.origHe=B.codes.includes("he")||B.codes.includes("iw");
   const eds={}; for(const r of ed){ const o=eds[r.ed]||(eds[r.ed]={title:r.edL||"",year:year(r.pub),pubs:new Set(),trs:new Set(),isbn:r.isbn||""}); if(r.pubrL) o.pubs.add(r.pubrL); if(r.trL) o.trs.add(r.trL); }
   B.heEd=Object.values(eds).sort((a,b)=>(a.year||9999)-(b.year||9999));
   if(!B.he&&B.heEd[0]&&B.heEd[0].title) B.he=B.heEd[0].title;
@@ -456,17 +461,26 @@ async function olWork(olid){
     rating:r&&r.summary&&r.summary.average,ratings:r&&r.summary&&r.summary.count,readers:doc.readinglog_count||0,firstYear:doc.first_publish_year,heb,desc};
 }
 async function seriesList(sid){
-  const rows=await sparql(`SELECT ?item ?heL ?enL ?title ?ord ?pub (MIN(?hp) AS ?hePub) (SAMPLE(?hl) AS ?heEdL) WHERE {
+  const rows=await sparql(`SELECT ?item ?heL ?enL ?ord ?pub ?olid (GROUP_CONCAT(DISTINCT CONCAT(?title,"\u0001",lang(?title));separator="\u0002") AS ?titles) (SAMPLE(?code) AS ?lc) (MIN(?hp) AS ?hePub) (SAMPLE(?hl) AS ?heEdL) WHERE {
     ?item p:P179 ?st. ?st ps:P179 wd:${sid}. FILTER NOT EXISTS{?item wdt:P629 ?x}
     OPTIONAL{?st pq:P1545 ?ord}
     OPTIONAL{?item rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{?item rdfs:label ?enL FILTER(lang(?enL)="en")}
-    OPTIONAL{?item wdt:P1476 ?title} OPTIONAL{?item wdt:P577 ?pub}
+    OPTIONAL{?item wdt:P1476 ?title} OPTIONAL{?item wdt:P577 ?pub} OPTIONAL{?item wdt:P648 ?olid} OPTIONAL{?item wdt:P407/wdt:P218 ?code}
     OPTIONAL{?ed wdt:P629 ?item; wdt:P407 wd:Q9288. OPTIONAL{?ed wdt:P577 ?hp} OPTIONAL{?ed rdfs:label ?hl FILTER(lang(?hl)="he")}}
-  } GROUP BY ?item ?heL ?enL ?title ?ord ?pub LIMIT 400`);
+  } GROUP BY ?item ?heL ?enL ?ord ?pub ?olid LIMIT 400`);
   const by={};
-  for(const r of rows){ const o=by[r.item]||(by[r.item]={id:r.item,he:r.heL||r.heEdL||"",en:r.title||r.enL||"",ord:r.ord||"",year:null,heYear:year(r.hePub)});
+  const origTitle=r=>{ const ts=(r.titles||"").split("\u0002").filter(Boolean).map(x=>{ const [t,l]=x.split("\u0001"); return {t,l}; });
+    return ((r.lc&&ts.find(t=>t.l===r.lc))||ts.find(t=>t.l==="en")||ts[0]||{t:r.enL||""}).t; };
+  for(const r of rows){ const o=by[r.item]||(by[r.item]={id:r.item,he:r.heL||r.heEdL||"",en:origTitle(r),ord:r.ord||"",year:null,heYear:year(r.hePub),olid:r.olid||"",heOrig:r.lc==="he"});
     const y=year(r.pub); if(y&&(!o.year||y<o.year)) o.year=y; if(!o.ord&&r.ord) o.ord=r.ord; }
-  const list=Object.values(by);
+  // one row per title (Wikidata sometimes has a play and its script as two items)
+  const seenT=new Set(); const list=Object.values(by).filter(o=>{ const k=norm(o.he)+"|"+norm(o.en); if(seenT.has(k)) return false; seenT.add(k); return true; });
+  // Hebrew translation year from Open Library's Hebrew editions, where Wikidata has none
+  await Promise.all(list.filter(o=>!o.heYear&&o.olid&&!o.heOrig).slice(0,25).map(async o=>{
+    const e=await settle(getJSON("https://openlibrary.org/works/"+o.olid+"/editions.json?limit=500")); if(!e) return;
+    const ys=(e.entries||[]).filter(x=>(x.languages||[]).some(l=>l.key==="/languages/heb")).map(x=>year(x.publish_date)).filter(y=>y&&(!o.year||y>=o.year)).sort();
+    if(ys.length){ o.heYear=ys[0]; o.heSrc="ol"; }
+  }));
   const ordN=o=>{ const n=parseFloat(String(o.ord).replace(",",".")); return isNaN(n)?null:n; };
   list.sort((a,b)=>{ const x=ordN(a),y=ordN(b); if(x!=null&&y!=null) return x-y; if(x!=null) return -1; if(y!=null) return 1; return (a.year||9999)-(b.year||9999); });
   const nm=await settle(sparql(`SELECT ?heL ?enL WHERE { OPTIONAL{wd:${sid} rdfs:label ?heL FILTER(lang(?heL)="he")} OPTIONAL{wd:${sid} rdfs:label ?enL FILTER(lang(?enL)="en")} }`));
@@ -490,11 +504,11 @@ function coverOf(B){
 
 /* ---- audience & sensitive content (heuristic, from subjects and genres in the sources) ---- */
 const FLAGS=[
-  {k:"sex",he:"תוכן מיני",sev:3,re:/\b(erotic\w*|erotica|sex(ual|uality)? ?(content|scenes|fiction)?|sex\b|bdsm|explicit|pornograph\w*|dark romance|romance\W+(adult|erotic|contemporary)|new adult)\b|ארוטי|מין\b|מיניות/i},
-  {k:"abuse",he:"התעללות / אונס / גילוי עריות",sev:3,re:/\b(rape|sexual (abuse|assault|violence)|child (sexual )?abuse|incest|domestic violence|abused (children|women))\b|התעללות|אונס/i},
+  {k:"sex",he:"תוכן מיני",sev:3,re:/\b(erotic\w*|erotica|sex(ual|uality)? ?(content|scenes|fiction)?|sex\b|bdsm|explicit|pornograph\w*|dark romance|erotic romance|romance\W+erotic|new adult)\b|ארוטי|מין\b|מיניות/i},
+  {k:"abuse",he:"התעללות / אונס / פדופיליה / גילוי עריות",sev:3,re:/\b(rape[ds]?|raping|sexual(ly)? (abus\w*|assault|violence)|child (sexual )?abuse|incest|domestic violence|abused (children|women)|pedophil\w*|paedophil\w*)\b|התעללות|אונס|נאנס|פדופיל|גילוי עריות/i},
   {k:"violence",he:"אלימות קשה / רצח",sev:2,re:/\b(violence|murder\w*|serial (killer|murder)\w*|torture|gore|massacre\w*|psychopath\w*|war crimes?|killings?)\b|אלימות|רצח/i},
   {k:"horror",he:"אימה",sev:2,re:/\b(horror|zombies?|occult|demonology|haunted)\b|אימה/i},
-  {k:"suicide",he:"התאבדות / פגיעה עצמית",sev:3,re:/\b(suicid\w*|self[- ]?(harm|injury|mutilation))\b|התאבדות/i},
+  {k:"suicide",he:"התאבדות / פגיעה עצמית",sev:3,re:/\b(suicid\w*|self[- ]?(harm|injury|mutilation))\b|התאבד/i},
   {k:"drugs",he:"סמים / אלכוהול / התמכרות",sev:2,re:/\b(drug (abuse|use|addiction)|drugs|substance abuse|addiction|alcoholi\w*|narcotics?)\b|סמים|התמכרות/i},
   {k:"ed",he:"הפרעות אכילה",sev:2,re:/\b(eating disorders?|anorexia|bulimia)\b|הפרעות אכילה/i},
   {k:"trauma",he:"שואה / רצח עם / מלחמה",sev:1,re:/\b(holocaust|genocide|concentration camps?|world war, 1939-1945)\b|שואה/i},
@@ -506,13 +520,18 @@ function audience(B){
   for(const a of B.aud){ parts.push([a.en,"קהל יעד בוויקינתונים"]); parts.push([a.he,"קהל יעד בוויקינתונים"]); }
   if(B.ol) for(const s of B.ol.subjects) parts.push([s,"נושא ב-Open Library"]);
   if(B.gb) for(const c of B.gb.cats) parts.push([c,"קטגוריה ב-Google Books"]);
+  // the summary is checked only for the severe topics (a plot summary mentions "murder" in every mystery)
+  const desc=[B.wiki&&B.wiki.text,B.gb&&B.gb.desc,B.ol&&B.ol.desc].filter(Boolean).join(" ");
+  const SEVERE=/\b(pedophil\w*|paedophil\w*|rape[ds]?|raping|incest|sexual(ly)? abus\w*|suicid\w*|self[- ]harm|erotic\w*)\b|פדופיל\S*|אונס|נאנס\S*|גילוי עריות|התאבד\S*|התעללות מינית|ארוטי\S*/gi;
+  if(desc) for(const m of new Set((desc.match(SEVERE)||[]).map(x=>x.toLowerCase()))) parts.push([m,"תקציר הספר"]);
   const T=parts.filter(p=>p[0]);
   const any=re=>T.find(p=>re.test(p[0]));
   const kid=any(/\b(juvenile|children'?s|picture books?|board books?|kinderbuch|jeunesse|infantil|easy readers?|bedtime)\b|ספרות ילדים|ספר ילדים|ילדים/i);
   const ya=any(/\b(young adult|teen|ya fiction|adolescen\w*|juvenile fiction.*(teen|young adult))\b|נוער|בוגרים צעירים/i);
   const adultG=any(/\b(adult fiction|adult literature|for adults|literary fiction)\b|ספרות למבוגרים|מבוגרים/i);
   // reading level → age: "Reading Level-Grade 4" ≈ 9-10; take the lowest grade listed
-  let grade=null; for(const p of T){ const m=String(p[0]).match(/reading level[- ]grade (\d+)/i); if(m){ const g=+m[1]; if(grade==null||g<grade) grade=g; } }
+  let grade=null,gradeMax=null; for(const p of T){ const m=String(p[0]).match(/reading level[- ]grade (\d+)/i); if(m){ const g=+m[1]; if(grade==null||g<grade) grade=g; if(gradeMax==null||g>gradeMax) gradeMax=g; } }
+  const gradeTxt=grade!=null?"רמת קריאה לפי Open Library: כיתה "+grade+(gradeMax>grade?"–"+gradeMax:""):"";
   const flags=[];
   for(const f of FLAGS){ const hits=T.filter(p=>f.re.test(p[0])); if(hits.length) flags.push({...f,why:[...new Set(hits.map(h=>h[0]))].slice(0,3),src:[...new Set(hits.map(h=>h[1]))]}); }
   const mature=B.gb&&B.gb.mature;
@@ -520,10 +539,10 @@ function audience(B){
   let cls="unk",badge="?",title="אין מספיק מידע על קהל היעד",ages="";
   if(mature||(sev>=3&&!kid)){ cls="bad"; badge="18+"; title="למבוגרים בלבד – לא לילדים ולא לנוער"; }
   else if(kid&&!ya){ cls=sev>=2?"mid":"ok"; badge=grade!=null?(grade+5)+"+":"ילדים"; title="ספר ילדים"; ages=grade!=null?"גיל משוער "+(grade+5)+"–"+(grade+7)+" (לפי רמת קריאה כיתה "+grade+")":""; }
-  else if(ya){ cls=sev>=3?"bad":sev>=2?"mid":"ok"; badge=sev>=3?"16+":"14+"; title=sev>=3?"נוער בוגר (16+) – יש תוכן רגיש":"נוער / בוגרים צעירים"; ages=grade!=null?"רמת קריאה מכיתה "+grade:""; }
+  else if(kid&&ya){ cls=sev>=3?"bad":sev>=2?"mid":"ok"; badge=sev>=3?"14+":"10+"; title=sev>=3?"נוער – יש תוכן רגיש":"ילדים בוגרים ונוער"; ages=gradeTxt; }
+  else if(ya){ cls=sev>=3?"bad":sev>=2?"mid":"ok"; badge=sev>=3?"16+":"14+"; title=sev>=3?"נוער בוגר (16+) – יש תוכן רגיש":"נוער / בוגרים צעירים"; ages=gradeTxt; }
   else if(adultG||sev>=2){ cls=sev>=2?"mid":"ok"; badge="מבוגרים"; title=sev>=2?"למבוגרים – לא מתאים לילדים":"ספרות למבוגרים"; }
   else if(T.length){ cls="unk"; badge="?"; title="קהל היעד לא מצוין במקורות"; }
-  if(kid&&ya&&!badge.includes("+")){ badge="10+"; }
   return {cls,badge,title,ages,flags,kid,ya,mature,n:T.length};
 }
 
@@ -532,7 +551,7 @@ function renderBook(B){
   const orig=B.title||B.en; const name=B.he||orig;
   const heEd=B.heEd[0];
   const olHeb=B.ol?B.ol.heb.filter(x=>x.year&&(!B.year||x.year>=B.year)).sort((a,b)=>a.year-b.year):[];
-  const heYear=heEd&&heEd.year ? {y:heEd.year,src:"ויקינתונים",pub:[...heEd.pubs].join(", "),tr:[...heEd.trs].join(", ")}
+  const heYear=B.origHe?null:heEd&&heEd.year ? {y:heEd.year,src:"ויקינתונים",pub:[...heEd.pubs].join(", "),tr:[...heEd.trs].join(", ")}
     : olHeb[0] ? {y:olHeb[0].year,src:"Open Library",pub:olHeb[0].pubs.join(", "),tr:""}
     : B.gb&&B.gb.heb&&B.gb.year ? {y:B.gb.year,src:"Google Books",pub:B.gb.publisher||"",tr:""} : null;
   const pubYear=B.year||(B.ol&&B.ol.firstYear);
@@ -544,7 +563,7 @@ function renderBook(B){
       ${B.authors.length?`<div class="by">${B.authors.map((a,i)=>`<button data-a="${i}">${esc(a.name)}</button>`).join(", ")}</div>`:""}
       <dl class="facts">
         ${pubYear?`<dt>יצא לאור</dt><dd>${pubYear}${B.langs.length?` · ${esc(B.langs.join(", "))}`:""}</dd>`:""}
-        ${heYear?`<dt>בעברית</dt><dd>${heYear.y}${heYear.pub?` · ${esc(heYear.pub)}`:""} <span class="src">(${heYear.src})</span>${heYear.tr?`<br><span class="muted">תרגום: ${esc(heYear.tr)}</span>`:""}</dd>`:`<dt>בעברית</dt><dd class="muted">לא נמצא תרגום במקורות</dd>`}
+        ${heYear?`<dt>בעברית</dt><dd>${heYear.y}${heYear.pub?` · ${esc(heYear.pub)}`:""} <span class="src">(${heYear.src})</span>${heYear.tr?`<br><span class="muted">תרגום: ${esc(heYear.tr)}</span>`:""}</dd>`:(B.origHe?"":`<dt>בעברית</dt><dd class="muted">לא נמצא תרגום במקורות</dd>`)}
         ${B.series.length&&!B.isSeries?`<dt>סדרה</dt><dd>${esc(B.series[0].name)}${B.series[0].ord?` · ספר ${esc(B.series[0].ord)}`:""}</dd>`:""}
         ${B.pages?`<dt>עמודים</dt><dd>${esc(B.pages)}</dd>`:""}
         ${B.ol&&B.ol.rating?`<dt>דירוג</dt><dd><span class="stars">${"★".repeat(Math.round(B.ol.rating))}${"☆".repeat(5-Math.round(B.ol.rating))}</span> ${B.ol.rating.toFixed(1)} <span class="src">(${B.ol.ratings} דירוגים, Open Library)</span></dd>`:""}
@@ -562,8 +581,8 @@ function renderBook(B){
     h+=`<div class="sec"><span class="t">${B.isSeries?"ספרי הסדרה":"כל ספרי הסדרה"}: ${esc(B.ser.name)}</span><span>${B.ser.list.length}</span></div>
     <table class="ser"><thead><tr><th>#</th><th>שם</th><th>יצא</th><th>בעברית</th></tr></thead><tbody>${B.ser.list.map((s,i)=>`
       <tr data-i="${i}" class="${s.id===B.qid?"cur":""}"><th>${esc(s.ord||"·")}</th><td>${esc(s.he||s.en)}${s.he&&s.en&&s.he!==s.en?`<span class="en">${esc(s.en)}</span>`:""}</td>
-      <td class="n">${s.year||"–"}</td><td class="n">${s.heYear||"–"}</td></tr>`).join("")}</tbody></table>
-    <div class="disc">„בעברית” – שנת התרגום כפי שרשומה בוויקינתונים. מקף = לא רשום (לא בהכרח שלא תורגם).</div>`;
+      <td class="n">${s.year||"–"}</td><td class="n">${s.id===B.qid&&heYear?heYear.y:s.heOrig?"מקור":s.heYear?s.heYear+(s.heSrc?"*":""):"–"}</td></tr>`).join("")}</tbody></table>
+    <div class="disc">„בעברית” – שנת התרגום לפי ויקינתונים; * = לפי מהדורה עברית ב-Open Library. מקף = לא רשום (לא בהכרח שלא תורגם).</div>`;
   }
   const about=B.wiki&&B.wiki.text||(B.gb&&B.gb.desc)||(B.ol&&B.ol.desc)||"";
   if(about) h+=`<div class="sec"><span class="t">על הספר</span><span class="src">${B.wiki?"ויקיפדיה"+(B.wiki.lang==="en"?" (אנגלית)":""):B.gb&&B.gb.desc?"Google Books":"Open Library"}</span></div>${aboutBox(about)}`;
@@ -667,7 +686,7 @@ async function openAuthor(qid,ok){
     for(const r of info){ I.he=I.he||r.heL; I.en=I.en||r.enL; I.desc=I.desc||r.desc; I.b=I.b||r.b; I.d=I.d||r.d; I.img=I.img||r.img; I.bp=I.bp||r.bpHe;
       I.hewiki=I.hewiki||r.hewiki; I.enwiki=I.enwiki||r.enwiki; I.olid=I.olid||r.olid;
       if(r.natHe&&!I.nat.includes(r.natHe)) I.nat.push(r.natHe); if(r.occHe&&!I.occ.includes(r.occHe)) I.occ.push(r.occHe); }
-    const W={}; for(const r of works){ const o=W[r.w]||(W[r.w]={id:r.w,he:r.heL||"",en:r.title||r.enL||"",year:null,sl:+r.sl||0,type:r.type||"",ser:r.ser||"",heYear:year(r.hePub),readers:0});
+    const W={}; for(const r of works){ const o=W[r.w]||(W[r.w]={id:r.w,he:r.heL||"",en:r.enL||r.title||"",year:null,sl:+r.sl||0,type:r.type||"",ser:r.ser||"",heYear:year(r.hePub),readers:0});
       const y=year(r.pub); if(y&&(!o.year||y<o.year)) o.year=y; }
     const [wiki,ol]=await Promise.all([ settle(wikiSummary(I.hewiki,I.enwiki)),
       settle(getJSON("https://openlibrary.org/search.json?limit=200&sort=readinglog&fields=key,title,first_publish_year,readinglog_count,ratings_average,ratings_count,cover_i&"+(I.olid?"author_key="+I.olid:"author="+encodeURIComponent(I.en||I.he||"")))) ]);
@@ -677,7 +696,7 @@ async function openAuthor(qid,ok){
     const extra=[];
     for(const d of (ol&&ol.docs)||[]){ const w=byTitle[norm(d.title)];
       if(w){ w.readers=Math.max(w.readers,d.readinglog_count||0); w.rating=w.rating||d.ratings_average; if(!w.year) w.year=d.first_publish_year; if(!w.cover&&d.cover_i) w.cover=d.cover_i; }
-      else if((d.readinglog_count||0)>=5&&extra.length<60){ const k=norm(d.title); if(!byTitle[k]){ const o={id:null,olid:d.key.replace("/works/",""),he:"",en:d.title,year:d.first_publish_year,sl:0,readers:d.readinglog_count||0,rating:d.ratings_average,cover:d.cover_i}; byTitle[k]=o; extra.push(o); } } }
+      else if((d.readinglog_count||0)>=20&&extra.length<40&&!/[ʻʼḥḳṭṣśẓ]|\bha-|\bve-|\bbe-/i.test(d.title)){ const k=norm(d.title); if(!byTitle[k]){ const o={id:null,olid:d.key.replace("/works/",""),he:"",en:d.title,year:d.first_publish_year,sl:0,readers:d.readinglog_count||0,rating:d.ratings_average,cover:d.cover_i}; byTitle[k]=o; extra.push(o); } } }
     let list=Object.values(W).concat(extra);
     for(const w of list) w.pop=(w.readers||0)+w.sl*150;
     AUTH={I,wiki,list:list.filter(w=>!SERIES_TYPES.has(w.type)),series:list.filter(w=>SERIES_TYPES.has(w.type))};
