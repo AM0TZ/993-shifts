@@ -60,15 +60,19 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
   .weeknav .lbl span{display:block;font-size:12px;font-weight:500;color:var(--muted)}
   /* which week is open – the current one (solid, accent), a coming one (dashed, amber) or a past one (dotted, gray):
      the week label and the side of the table, same marks as the deposits tab */
-  :root{--future:#b86e00} :root[data-theme=dark]{--future:#e3a33b} :root[data-theme=brand]{--future:#ffb347}
+  /* the colors are the deposits tab's (--green / --amber there, per theme) */
+  :root{--wk-cur:#2b7a4b;--wk-cur-bg:#e1efe6;--wk-fut:#a35f00;--wk-fut-bg:#fff2dc}
+  :root[data-theme=dark]{--wk-cur:#5cc285;--wk-cur-bg:#163222;--wk-fut:#f0b04a;--wk-fut-bg:#3a2a0c}
+  :root[data-theme=brand]{--wk-cur:#72ba43;--wk-cur-bg:#1d3d4a;--wk-fut:#ffc04d;--wk-fut-bg:#3e3550}
   .weeknav .lbl{border:2px solid transparent;border-radius:12px;padding:3px 6px}
-  [data-when=cur] .weeknav .lbl{border-color:var(--accent);background:var(--soft)}
-  :root [data-when=cur] .weeknav .lbl span{color:var(--accent);font-weight:700}
-  [data-when=future] .weeknav .lbl{border:2px dashed var(--future)}
-  :root [data-when=future] .weeknav .lbl span{color:var(--future);font-weight:700}
+  [data-when=cur] .weeknav .lbl{border-color:var(--wk-cur);background:var(--wk-cur-bg)}
+  :root [data-when=cur] .weeknav .lbl span{color:var(--wk-cur);font-weight:700}
+  [data-when=future] .weeknav .lbl{border:2px dashed var(--wk-fut);background:var(--wk-fut-bg)}
+  :root [data-when=future] .weeknav .lbl span{color:var(--wk-fut);font-weight:700}
   [data-when=past] .weeknav .lbl{border:2px dotted var(--muted)}
-  [data-when=cur] table.grid{border-inline-start:5px solid var(--accent)}
-  [data-when=future] table.grid{border-inline-start:5px dashed var(--future)}
+  :root [data-when=past] .weeknav .lbl span{color:var(--muted)}
+  [data-when=cur] table.grid{border-inline-start:5px solid var(--wk-cur)}
+  [data-when=future] table.grid{border-inline-start:5px dashed var(--wk-fut)}
   [data-when=past] table.grid{border-inline-start:5px dotted var(--muted)}
   table.grid{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
   .grid th,.grid td{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:6px 4px;text-align:center;vertical-align:middle}
