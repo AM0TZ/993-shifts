@@ -58,6 +58,18 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
   .weeknav{display:flex;align-items:center;gap:8px;margin-top:10px}
   .weeknav .lbl{flex:1;text-align:center;font-weight:700;font-size:16px}
   .weeknav .lbl span{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+  /* which week is open – the current one (solid, accent), a coming one (dashed, amber) or a past one (dotted, gray):
+     the week label and the side of the table, same marks as the deposits tab */
+  :root{--future:#b86e00} :root[data-theme=dark]{--future:#e3a33b} :root[data-theme=brand]{--future:#ffb347}
+  .weeknav .lbl{border:2px solid transparent;border-radius:12px;padding:3px 6px}
+  [data-when=cur] .weeknav .lbl{border-color:var(--accent);background:var(--soft)}
+  :root [data-when=cur] .weeknav .lbl span{color:var(--accent);font-weight:700}
+  [data-when=future] .weeknav .lbl{border:2px dashed var(--future)}
+  :root [data-when=future] .weeknav .lbl span{color:var(--future);font-weight:700}
+  [data-when=past] .weeknav .lbl{border:2px dotted var(--muted)}
+  [data-when=cur] table.grid{border-inline-start:5px solid var(--accent)}
+  [data-when=future] table.grid{border-inline-start:5px dashed var(--future)}
+  [data-when=past] table.grid{border-inline-start:5px dotted var(--muted)}
   table.grid{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
   .grid th,.grid td{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:6px 4px;text-align:center;vertical-align:middle}
   .grid tr>*:last-child{border-left:0}
@@ -215,6 +227,13 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
 :root[data-theme=draw] .big:not(.alt),:root[data-theme=draw] .sheet .acts .pri,:root[data-theme=draw] .lock button.go{background:#fff;color:#111;font-weight:800}
 :root[data-theme=draw] .grid thead th{background:#fff;color:#111;border-bottom:2px solid #111}
 :root[data-theme=draw] .hint{background:#fff;border:1.5px dashed #111}
+:root[data-theme=draw] [data-when=cur] table.grid{border-inline-start:5px solid #111!important}
+:root[data-theme=draw] [data-when=future] table.grid{border-inline-start:5px dashed #111!important}
+:root[data-theme=draw] [data-when=past] table.grid{border-inline-start:5px dotted #444!important}
+:root[data-theme=draw] [data-when=cur] .weeknav .lbl{border:2px solid #111;background:#fff var(--hatch)}
+:root[data-theme=draw] [data-when=future] .weeknav .lbl{border:2px dashed #111}
+:root[data-theme=draw] [data-when=past] .weeknav .lbl{border:2px dotted #444}
+:root[data-theme=draw] .weeknav .lbl span{color:#111!important}
 :root[data-theme=draw] .themeBtn svg{width:22px;height:22px;display:block}
 :root[data-theme=draw] table.grid,:root[data-theme=draw] table.log,:root[data-theme=draw] .card{border-radius:18px 7px 15px 9px/8px 16px 7px 18px!important}
 </style>
@@ -486,7 +505,9 @@ function weekLabel(key){
 }
 function namesHtml(arr){ return arr.map(n=>`<span class="name${n===S.me?" me":""}" style="${cvars(n)}">${esc(n)}</span>`).join("<br>"); }
 function renderShifts(){
-  const L=weekLabel(week); $("wLabel").innerHTML=`${L.range}<span>${L.rel}</span>`;
+  const L=weekLabel(week), when=L.diff===0?"cur":L.diff>0?"future":"past";
+  $("tab-shifts").dataset.when=when;
+  $("wLabel").innerHTML=`${L.range}<span>${when==="cur"?"● ":when==="future"?"◷ ":"↺ "}${L.rel}</span>`;
   $("btnToday").style.display = L.diff===0 ? "none" : "";
   const start=parse(week), today=todayIso();
   let h=`<colgroup><col style="width:64px">${S.types.map(t=>`<col${t.id==="off"?' class="off"':""}>`).join("")}</colgroup>`;
