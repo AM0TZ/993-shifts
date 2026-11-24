@@ -22,11 +22,13 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
   :root[data-theme=dark]{--bg:#0c0e0d;--card:#161917;--ink:#f1f2ee;--muted:#98a29b;--line:#2a2f2c;--accent:#4fae75;--accent-ink:#06150c;--soft:#1c3427;--head:#1f4d33;--today:#14241a;--warn:#e9774f;--shadow:none;color-scheme:dark}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Heebo,system-ui,sans-serif}
-  body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+  /* the tab bar is at the top; --navh is its height (set from the page, 0 when it is hidden) */
+  :root{--navh:calc(64px + env(safe-area-inset-top))}
+  body{padding-top:var(--navh);padding-bottom:calc(16px + env(safe-area-inset-bottom))}
   button{font:inherit;color:inherit;cursor:pointer}
   .wrap{max-width:720px;margin:0 auto;padding:0 12px 24px}
   .tab{display:none}.tab.on{display:block}
-  header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 8px}
+  header.top{position:sticky;top:var(--navh);z-index:5;background:var(--bg);padding:12px 0 8px}
   .title{display:flex;align-items:center;gap:8px}
   .title h1{flex:1;margin:0;font-size:19px;font-weight:800;line-height:1.2}
   .title h1 small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
@@ -46,7 +48,7 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
   :root[data-theme=brand] .grid{border-color:#fff100}
   :root[data-theme=brand] .grid tr.today th{box-shadow:inset -4px 0 0 #d2202a}
   :root[data-theme=brand] .big.alt{border-color:#d2202a}
-  :root[data-theme=brand] nav{border-top:3px solid #fff100}
+  :root[data-theme=brand] nav{border-bottom:3px solid #fff100}
   :root[data-theme=brand] .sheet{border-top:4px solid #fff100}
   :root[data-theme=brand] .lock .ic{background:#fff100;color:#0b3b8c}
   :root[data-theme=brand] .weeknav .lbl span{color:#72ba43}
@@ -139,12 +141,12 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
   .sup span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 
   /* the embedded pages get the same header as the other tabs (title + display-mode button); their own titles are hidden */
-  #tab-pubs.on,#tab-dep.on{position:fixed;top:0;left:0;right:0;bottom:64px;display:flex;flex-direction:column;background:var(--bg)}
+  #tab-pubs.on,#tab-dep.on{position:fixed;top:var(--navh);left:0;right:0;bottom:0;padding-bottom:env(safe-area-inset-bottom);display:flex;flex-direction:column;background:var(--bg)}
   header.tabhead{position:static;flex:none;width:100%;max-width:720px;margin:0 auto;padding:12px 12px 8px;box-sizing:border-box}
   #pubsFrame,#depFrame{width:100%;flex:1;min-height:0;border:0;display:block;background:var(--bg)}
 
-  /* ---- bottom nav ---- */
-  nav{position:fixed;bottom:0;left:0;right:0;z-index:8;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+  /* ---- tab bar (top) ---- */
+  nav{position:fixed;top:0;left:0;right:0;z-index:8;background:var(--card);border-bottom:1px solid var(--line);display:flex;padding-top:env(safe-area-inset-top)}
   nav button{flex:1;border:0;background:none;padding:8px 0 10px;color:var(--muted);font-size:12px;font-weight:500}
   nav button i{display:block;height:26px}
   nav button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -172,13 +174,13 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
   .lst .r{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:6px 10px}
   .lst .r span{flex:1}
   .lst .r button{border:0;background:none;color:var(--warn);font-size:14px}
-  .toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+  .toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
   .toast.on{opacity:1}
   .sheet.on ~ .toast{bottom:auto;top:calc(16px + env(safe-area-inset-top))}
   .sync{text-align:center;font-size:12px;color:var(--muted);margin-top:6px;min-height:16px}
   .sync.err{color:var(--warn)}
   .sync button{border:0;background:none;color:var(--accent);font-size:12px;font-weight:700;padding:0 4px}
-  body.viewer{padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  body.viewer{padding-bottom:calc(16px + env(safe-area-inset-bottom));--navh:env(safe-area-inset-top)}
   body.viewer nav,body.viewer #btnCopy,body.viewer #btnClearWeek,body.viewer .mgr{display:none}
   body.viewer .grid td{cursor:default}
   body.viewer .grid td.empty::after{content:""}
@@ -216,7 +218,7 @@ document.querySelector('meta[name=theme-color]').content=m==="brand"?"#12215c":m
 :root[data-theme=draw] .title h1 small,:root[data-theme=draw] .weeknav .lbl span,:root[data-theme=draw] .grid thead th small,:root[data-theme=draw] .grid tbody th small,:root[data-theme=draw] .big small{
   font-family:Heebo,system-ui,sans-serif!important;font-size-adjust:none;font-weight:500!important;letter-spacing:0}
 :root[data-theme=draw] header.top{background:#fff;border-bottom:2.5px dashed #111}
-:root[data-theme=draw] nav{background:#fff;border-top:2.5px dashed #111}
+:root[data-theme=draw] nav{background:#fff;border-bottom:2.5px dashed #111}
 :root[data-theme=draw] nav button{color:#444}
 :root[data-theme=draw] nav button.on{color:#111;text-decoration:underline;text-decoration-style:wavy;text-underline-offset:4px}
 :root[data-theme=draw] .toast{background:#111;color:#fff;border-radius:var(--wob)}
@@ -257,7 +259,7 @@ document.body.appendChild(d.firstChild)}if(document.body)add();else document.add
 :root[data-theme=cyber] .pill.acc,:root[data-theme=cyber] .chip.on,:root[data-theme=cyber] .grid tr.today>*{background:#0f2328!important;color:#5ef2ff!important;box-shadow:inset 0 0 0 1px #5ef2ff!important}
 :root[data-theme=cyber] .title h1,:root[data-theme=cyber] .sheet h2,:root[data-theme=cyber] .sec,:root[data-theme=cyber] .weeknav .lbl{color:#f0e4e4!important;letter-spacing:.04em}
 :root[data-theme=cyber] header.top{background:rgba(11,7,9,.96);border-bottom:1px solid rgba(94,242,255,.45)}
-:root[data-theme=cyber] nav{background:rgba(11,7,9,.96);border-top:1px solid rgba(94,242,255,.45)}
+:root[data-theme=cyber] nav{background:rgba(11,7,9,.96);border-bottom:1px solid rgba(94,242,255,.45)}
 :root[data-theme=cyber] nav button{color:#c2655f}
 :root[data-theme=cyber] nav button.on{color:#5ef2ff}
 :root[data-theme=cyber] .big:not(.alt),:root[data-theme=cyber] .sheet .acts .pri,:root[data-theme=cyber] .lock button.go{background:#5ef2ff!important;color:#0b0709!important}
@@ -523,6 +525,7 @@ function myShiftsOn(dateIso){
 /* ================= tabs ================= */
 let tab="shifts";
 function openTab(t){
+  fitNav();
   tab=t;
   document.querySelectorAll(".tab").forEach(s=>s.classList.toggle("on",s.id==="tab-"+t));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
@@ -745,6 +748,57 @@ function openViewerSettings(){
       s.querySelector("[data-a=done]").onclick=closeSheet;
     });
 }
+// ---- daily backup at 12:00 to a file the user picked, e.g. in Drive (the app does it, see DriveBackup.java) ----
+function driveSt(){ try{ return JSON.parse(A.driveStatus()); }catch(e){ return {}; } }
+function fmtWhen(ms){ if(!ms) return ""; const d=new Date(ms), t=new Date(), y=new Date(); y.setDate(t.getDate()-1);
+  const tm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  const tom=new Date(); tom.setDate(t.getDate()+1);
+  return (d.toDateString()===t.toDateString()?"היום":d.toDateString()===y.toDateString()?"אתמול":d.toDateString()===tom.toDateString()?"מחר":d.getDate()+"/"+(d.getMonth()+1))+" "+tm; }
+function driveHtml(){
+  const st=driveSt();
+  const where=st.where==="Google Drive"?" בדרייב":st.where?" ב"+esc(st.where):"";
+  const line=st.connected
+    ? `פעיל ✓ · כל יום ב-12:00 האפליקציה מעדכנת את הקובץ "${esc(st.name||"companion993-backup.json")}"${where}.${st.next?"<br>הגיבוי הבא: "+fmtWhen(st.next):""}`
+    : `כבוי. בוחרים פעם אחת קובץ – למשל בתיקייה בדרייב – וכל יום ב-12:00 האפליקציה שומרת בו את המשמרות, הנוכחות, ההפקדות עם הצילומים ועריכות חיפוש הוצל״א.`;
+  return `<div style="font-size:14px">${line}</div>
+    ${st.running?`<div style="font-size:14px;margin-top:6px">מגבה עכשיו…</div>`:st.last?`<div style="font-size:14px;margin-top:6px">גיבוי אחרון: ${fmtWhen(st.last)}</div>`:""}
+    ${st.error?`<div style="font-size:13px;margin-top:6px;color:var(--warn)">⚠ ${esc(st.error)}${st.errorAt?" ("+fmtWhen(st.errorAt)+")":""}</div>`:""}
+    <div class="row" style="margin-top:8px">${st.connected
+      ? `<button class="pill" id="drvNow"${st.running?" disabled":""}>גיבוי עכשיו</button><button class="pill" id="drvOn">קובץ אחר…</button><button class="pill" id="drvOff">כיבוי</button>`
+      : `<button class="pill acc" id="drvOn">בחירת קובץ גיבוי…</button>`}
+      <button class="pill" id="drvRestore">שחזור מגיבוי…</button></div>
+    <input type="file" id="drvFile" accept="application/json,.json" hidden>
+    <div class="muted" style="font-size:12px;margin-top:6px">בדרייב: במסך שנפתח בוחרים "Drive" ואת התיקייה, ולוחצים "שמירה". נשמר רק הגיבוי האחרון (גרסאות קודמות נשארות לזמן מה בדרייב ב"ניהול גרסאות"). סיסמת האתר וטוקן GitHub לא נכללים בגיבוי.</div>`;
+}
+function bindDrive(box){
+  const q=id=>box.querySelector(id);
+  if(q("#drvOn")) q("#drvOn").onclick=()=>A.driveConnect();
+  if(q("#drvNow")) q("#drvNow").onclick=()=>{ A.driveBackupNow(); toast("מגבה…"); };
+  if(q("#drvOff")) q("#drvOff").onclick=()=>confirmSheet("לכבות את הגיבוי היומי?","הקובץ שכבר נשמר נשאר במקומו. אפשר להפעיל שוב בכל רגע.","כיבוי",()=>{ A.driveDisconnect(); openSettings(); });
+  q("#drvRestore").onclick=()=>{ const f=q("#drvFile"); f.value=""; f.click(); };
+  q("#drvFile").onchange=async e=>{
+    const file=e.target.files&&e.target.files[0]; if(!file) return;
+    let B=null; try{ B=JSON.parse(await file.text()); }catch(err){}
+    if(!B||B.app!=="companion993"){ toast("זה לא קובץ גיבוי של קומפניון 993"); return; }
+    const weeks=B.deposits&&B.deposits.weeks?Object.keys(B.deposits.weeks).length:0;
+    confirmSheet("שחזור מגיבוי",`גיבוי מ-${fmtWhen(Date.parse(B.created))}: הסידור, הנוכחות, עריכות חיפוש הוצל״א ו-${weeks} שבועות הפקדה יחליפו את מה שבטלפון. לפני השחזור נשמר עותק של המצב הנוכחי באפליקציה.`,"שחזור",()=>restoreDaily(B));
+  };
+}
+window.onDriveStatus=()=>{ const b=$("driveBox"); if(b){ b.innerHTML=driveHtml(); bindDrive(b); } };
+async function restoreDaily(B){
+  if(A.snapshotBeforeRestore&&!A.snapshotBeforeRestore()){ toast("לא הצלחתי לשמור עותק לפני השחזור – השחזור בוטל"); return; }
+  // deposits first: its page has to be loaded to put the weeks and photos back
+  if(B.deposits&&B.deposits.weeks){
+    initDep();
+    for(let i=0;i<50&&!(depWin()&&depWin().restoreDepositsBackup);i++) await new Promise(r=>setTimeout(r,200));
+    const ok=depWin()&&depWin().restoreDepositsBackup?await depWin().restoreDepositsBackup(B.deposits):false;
+    if(!ok){ toast("שחזור ההפקדות נכשל – שאר השחזור בוטל"); return; }
+  }
+  if(B.overrides&&A.saveOverrides) A.saveOverrides(JSON.stringify(B.overrides));
+  for(const k of ["shifts","clock","me"]) if(B.data&&B.data[k]!=null) store.set(k,B.data[k]);
+  toast("השחזור הושלם");
+  setTimeout(()=>location.reload(),900);
+}
 function openSettings(){
   if(VIEWER) return openViewerSettings();
   const keepScroll=sheetOpen?$("sheet").scrollTop:0;
@@ -772,9 +826,11 @@ function openSettings(){
       <div class="two"><div><input id="pubTok" type="password" placeholder="github_pat_…" autocomplete="off"></div><div style="flex:0 0 auto"><button class="pill" id="pubTokSave" style="height:100%">שמירה</button></div></div>
       <div class="muted" style="font-size:12px;margin-top:6px">Fine-grained token לריפו ${SYNC.repo} בלבד, עם הרשאת Contents: Read and write. נשמר רק בטלפון הזה.</div>
     </div>
+    ${A&&A.driveStatus?`<label>גיבוי יומי (לדרייב)</label><div class="pubbox" id="driveBox">${driveHtml()}</div>`:""}
     <div class="acts"><button class="pri" data-a="done">סיום</button></div>
     <div class="muted" style="font-size:12px;margin-top:12px;text-align:center">קומפניון 993 · צומת ספרים${A&&A.version?" · גרסה "+esc(A.version()):""}<br>© ${new Date().getFullYear()} amotz.creative. כל הזכויות שמורות<br>גופנים בקוד פתוח: Heebo, Assistant, Amatic SC (מצב ציור), Rajdhani (מצב סייבר) – SIL Open Font License 1.1</div>`, s=>{
       s.querySelector("#setMe").onchange=e=>{ S.me=e.target.value; saveS(); };
+      if(s.querySelector("#driveBox")) bindDrive(s.querySelector("#driveBox"));
       s.querySelectorAll("#staffList button[data-i]").forEach(b=>b.onclick=()=>{ const n=S.staff.splice(+b.dataset.i,1)[0]; if(S.colors) delete S.colors[n]; saveS(); openSettings(); });
       s.querySelectorAll("#staffList button[data-sw]").forEach(b=>b.onclick=()=>{ const n=S.staff[+b.dataset.sw]; palFor = palFor===n ? "" : n; openSettings(); });
       s.querySelectorAll(".pal button").forEach(b=>b.onclick=()=>{ S.colors[b.dataset.who]=b.dataset.c; palFor=""; saveS(); renderShifts(); openSettings(); });
@@ -892,7 +948,9 @@ function initPubs(){
   $("pubsFrame").onload=()=>{ syncPubsMenu(); const d=pubsDoc(); if(d&&d.body) new MutationObserver(syncPubsMenu).observe(d.body,{attributes:true,attributeFilter:["class"]}); };
   $("pubsFrame").src="pubs.html";
 }
-function fitPubs(){ $("tab-pubs").style.bottom=$("nav").offsetHeight+"px"; }
+function fitNav(){ const n=$("nav"); document.documentElement.style.setProperty("--navh",(n.offsetHeight||0)+"px"); }
+window.addEventListener("resize",fitNav);
+function fitPubs(){ fitNav(); }
 window.addEventListener("resize",()=>{ if(tab==="pubs") fitPubs(); });
 const pubsWin=()=>{ try{ return $("pubsFrame").contentWindow; }catch(e){ return null; } };
 // theme changes from either page apply to both
@@ -924,7 +982,7 @@ function initDep(){
   if(depLoaded) return; depLoaded=true;
   $("depFrame").src="hafkadot.html";
 }
-function fitDep(){ $("tab-dep").style.bottom=$("nav").offsetHeight+"px"; }
+function fitDep(){ fitNav(); }
 window.addEventListener("resize",()=>{ if(tab==="dep") fitDep(); });
 const depWin=()=>{ try{ return $("depFrame").contentWindow; }catch(e){ return null; } };
 window.onScan=function(k,url){ const w=depWin(); try{ w&&w.onScan&&w.onScan(k,url); }catch(e){} };
